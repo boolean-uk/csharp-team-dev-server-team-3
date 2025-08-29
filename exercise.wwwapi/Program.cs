@@ -130,4 +130,6 @@ app.ConfigureCohortEndpoints();
 
 app.ConfigurePostEndpoints();
 
+app.ConfigureValidationEndpoint();
+
 app.Run();

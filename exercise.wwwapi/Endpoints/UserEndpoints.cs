@@ -45,8 +45,12 @@ namespace exercise.wwwapi.EndPoints
         {
             //user exists
             if (service.GetAll().Where(u => u.Email == request.email).Any()) return Results.Conflict(new ResponseDTO<RegisterFailureDTO>() { Status = "Fail" });
-            
 
+
+            // TODO: Add salt to password?
+            // TODO: Ensure valid password
+            //string validationResult = Validator.Password(request.password);
+            //if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = "Fail" });
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
 
@@ -54,7 +58,7 @@ namespace exercise.wwwapi.EndPoints
 
             user.Username = !string.IsNullOrEmpty(request.username) ? request.username : request.email;
             user.PasswordHash = passwordHash;
-            user.Email = request.email;
+            user.Email = request.email; 
             user.FirstName = !string.IsNullOrEmpty(request.firstName) ? request.firstName : string.Empty;
             user.LastName = !string.IsNullOrEmpty(request.lastName) ? request.lastName : string.Empty;
             user.Bio = !string.IsNullOrEmpty(request.bio) ? request.bio : string.Empty;
@@ -81,6 +85,10 @@ namespace exercise.wwwapi.EndPoints
         private static async Task<IResult> Login(LoginRequestDTO request, IRepository<User> service, IConfigurationSettings config)
         {
             //if (string.IsNullOrEmpty(request.username)) request.username = request.email;
+
+            // HAVE to check for valid email/password before verifying if the user already exists, otherwise breach of security
+            // TODO: validate password
+
 
             //user doesn't exist
             if (!service.GetAll().Where(u => u.Email == request.email).Any()) return Results.BadRequest(new Payload<Object>() { status = "User does not exist", data = new { email="Invalid email and/or password provided"} });
