@@ -30,7 +30,7 @@ namespace exercise.wwwapi.Endpoints
             if (result != "Accepted") return TypedResults.BadRequest(result);
             var emailExists = repository.GetAllFiltered(q => q.Email == email.Email);
             if (emailExists.Count() != 0) return TypedResults.BadRequest("Email already exists");
-            return TypedResults.Ok();
+            return TypedResults.Ok(result);
         }
   
         /// <summary>

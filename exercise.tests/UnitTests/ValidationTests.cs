@@ -22,4 +22,27 @@ public class ValidationTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.EqualTo(expected));
     }
+
+    [TestCase("valid@email.com", "Accepted")]
+    [TestCase("valid@email.com.no", "Accepted")]
+    [TestCase("valid.mail@email.com", "Accepted")]
+    [TestCase("invalid.com", "Invalid email format")]
+    [TestCase("invalid@", "Invalid email format")]
+    [TestCase("invalid", "Invalid email format")]
+    [TestCase("invalid@..no", "Invalid email domain")]
+    [TestCase("invalid@text", "Invalid email domain")]
+    [TestCase("invalid@.email.com", "Invalid email domain")]
+    [TestCase("invalid@email.com.", "Invalid email domain")]
+    public void ValidateEmail(string input, string expected)
+    {
+        // act 
+        // no setup needed as Validator class is static
+
+        // arrange
+        string result = Validator.Email(input);
+
+        // assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.EqualTo(expected));
+    }
 }
