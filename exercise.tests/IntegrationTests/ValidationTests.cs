@@ -147,5 +147,67 @@ namespace exercise.tests.IntegrationTests
             Console.WriteLine("Message: " + message);
             Assert.That(message?.ToString(), Is.EqualTo(expected));
         }
+
+
+
+
+
+
+
+        [TestCase("username", HttpStatusCode.OK)]
+        [TestCase("u", HttpStatusCode.OK)]
+        [TestCase("usernameusername", HttpStatusCode.OK)]
+        [TestCase("user-name", HttpStatusCode.OK)]
+        [TestCase("username1", HttpStatusCode.OK)]
+        [TestCase("usernameusernameuser", HttpStatusCode.BadRequest)]
+        [TestCase("Username", HttpStatusCode.BadRequest)]
+        [TestCase("user_name", HttpStatusCode.BadRequest)]
+        [TestCase("!username", HttpStatusCode.BadRequest)]
+        [TestCase("invalid@", HttpStatusCode.BadRequest)]
+        [TestCase("invalid.", HttpStatusCode.BadRequest)]
+        public async Task ValidateUsernameStatus(string input, HttpStatusCode statusCode)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/username/{input}");
+            Console.WriteLine($"{statusCode} : {response.StatusCode}");
+
+            // Assert
+            Assert.That(response.StatusCode, Is.EqualTo(statusCode));
+        }
+
+
+        [TestCase("username", "Accepted")]
+        [TestCase("u", "Accepted")]
+        [TestCase("usernameusername", "Accepted")]
+        [TestCase("user-name", "Accepted")]
+        [TestCase("username1", "Accepted")]
+        [TestCase("usernameusernameuser", "Username length must be shorter than 17")]
+        [TestCase("Username", "Username must only contain lowercase letters 0-9 and -")]
+        [TestCase("user_name", "Username must only contain lowercase letters 0-9 and -")]
+        [TestCase("!username", "Username must only contain lowercase letters 0-9 and -")]
+        [TestCase("invalid@", "Username must only contain lowercase letters 0-9 and -")]
+        [TestCase("invalid.", "Username must only contain lowercase letters 0-9 and -")]
+        public async Task ValidateUsernameMessage(string input, string expected)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/username/{input}");
+            Console.WriteLine("r,", response);
+
+            // Assert
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            JsonNode? message = null;
+            if (!string.IsNullOrWhiteSpace(contentString))
+            {
+                message = JsonNode.Parse(contentString);
+            }
+
+            Console.WriteLine("Message: " + message);
+            Assert.That(message?.ToString(), Is.EqualTo(expected));
+        }
     }
 }
