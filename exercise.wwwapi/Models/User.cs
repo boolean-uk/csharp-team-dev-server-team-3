@@ -7,17 +7,17 @@ namespace exercise.wwwapi.Models
     [Table("users")]
     public class User
     {
-        [Column("id")]
+        [Key,Column("id")]
         public int Id { get; set; }
 
         [Column("username")]
-        public string Username { get; set; }
+        public string Username { get; set; } = string.Empty;
 
         [Column("passwordhash")]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = string.Empty;
 
         [Column("email"), EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Column("firstName")]
         public string FirstName { get; set; } = string.Empty;
@@ -45,6 +45,9 @@ namespace exercise.wwwapi.Models
 
         [Column("endDate")]
         public DateTime EndDate { get; set; }
+
+        [Column("photo")]
+        public string Photo {  get; set; } = string.Empty;
 
         //public ICollection<Cohort> Cohorts { get; set; }
 
