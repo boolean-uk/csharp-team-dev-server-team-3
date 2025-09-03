@@ -15,13 +15,13 @@ namespace exercise.wwwapi.Endpoints
         {
             var validators = app.MapGroup("/validation");
             validators.MapPost("/password", ValidatePassword).WithSummary("Validate a password");
-            validators.MapGet("/username/{username}", ValidateUsername).WithSummary("Validate a Username");
             validators.MapGet("/email/{email}", ValidateEmail).WithSummary("Validate an email address");
-            validators.MapGet("/validate-git-username/{gitUsername}", ValidateGitUsername).WithSummary("Validate a GitHub username");
+            validators.MapGet("/username/{username}", ValidateUsername).WithSummary("Validate a username");
+            validators.MapGet("/git-username/{gitUsername}", ValidateGitUsername).WithSummary("Validate a GitHub username");
         }
 
         /// <summary>
-        /// Validates a GitHub username based GitHub's rules.
+        /// Validates a username based GitHub's rules.
         /// Source: https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication
         /// </summary>
         /// <param name="repository"> A <see cref="IRepository{User}"/> object used to query the user data source for existing GitHub usernames.</param>
@@ -37,10 +37,10 @@ namespace exercise.wwwapi.Endpoints
         private static IResult ValidateGitUsername(IRepository<User> repository, string gitUsername)
         {
             if (gitUsername == null || string.IsNullOrEmpty(gitUsername)) return TypedResults.BadRequest("Something went wrong!");
-            string result = Helpers.Validator.GitUsername(gitUsername);
+            string result = Helpers.Validator.Username(gitUsername);
             if (result != "Accepted") return TypedResults.BadRequest(result);
             var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == gitUsername);
-            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("Email already exists");
+            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username already exists");
             return TypedResults.Ok(result);
         }
 
