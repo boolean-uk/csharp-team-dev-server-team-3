@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace exercise.wwwapi.Models
 {
-    public enum Roles { teacher, student } // Changed to public
+    public enum Roles { teacher, student }
     [Table("users")]
     public class User
     {
