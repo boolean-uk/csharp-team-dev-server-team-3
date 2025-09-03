@@ -1,4 +1,5 @@
-﻿using exercise.wwwapi.Configuration;
+﻿using AutoMapper;
+using exercise.wwwapi.Configuration;
 using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Login;
@@ -35,13 +36,20 @@ namespace exercise.wwwapi.EndPoints
         private static async Task<IResult> GetUsers(IRepository<User> service, string? firstName, ClaimsPrincipal user)
         {
             IEnumerable<User> results = await service.Get();
-            UsersSuccessDTO userData = new UsersSuccessDTO() { Users = !string.IsNullOrEmpty(firstName) ? results.Where(i => i.Email.Contains(firstName)).ToList() : results.ToList() };
-            ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>() { Status = "success", Data = userData };
+            UsersSuccessDTO userData = new UsersSuccessDTO() { 
+                Users = !string.IsNullOrEmpty(firstName) 
+                    ? results.Where(i => i.Email.Contains(firstName)).ToList() 
+                    : results.ToList() };
+            ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>() 
+                {
+                    Status = "success", 
+                    Data = userData 
+                };
             return TypedResults.Ok(response);
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        private static async Task<IResult> Register(RegisterRequestDTO request, IRepository<User> service)
+        private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
         {
             //user exists
             if (service.GetAll().Where(u => u.Email == request.email).Any()) return Results.Conflict(new ResponseDTO<RegisterFailureDTO>() { Status = "Fail" });
@@ -67,22 +75,18 @@ namespace exercise.wwwapi.EndPoints
             service.Insert(user);
             service.Save();
 
-            ResponseDTO<RegisterSuccessDTO> response = new ResponseDTO<RegisterSuccessDTO>();
-            response.Status = "success";
-            response.Data.user.firstName = user.FirstName;
-            response.Data.user.lastName = user.LastName;
-            response.Data.user.bio = user.Bio;
-            response.Data.user.githubUrl = user.GithubUrl;
-            response.Data.user.username = user.Username;
-            response.Data.user.email = user.Email;
-
+            ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
+            {
+                Status = "success",
+                Data = mapper.Map<UserDTO>(user)
+            };
 
             return Results.Ok(response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static async Task<IResult> Login(LoginRequestDTO request, IRepository<User> service, IConfigurationSettings config)
+        private static IResult Login(LoginRequestDTO request, IRepository<User> service, IConfigurationSettings config, IMapper mapper)
         {
             //if (string.IsNullOrEmpty(request.username)) request.username = request.email;
 
@@ -103,16 +107,16 @@ namespace exercise.wwwapi.EndPoints
 
             string token = CreateToken(user, config);
 
-            ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>();
-            response.Data.user.Id = user.Id;
-            response.Data.user.Email = user.Email;
-            response.Data.user.FirstName = user.FirstName;
-            response.Data.user.LastName = user.LastName;
-            response.Data.user.Bio = user.Bio;
-            response.Data.user.GithubUrl = user.GithubUrl;
-
-
-            response.Data.token = token;
+            ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
+            {
+                Status = "success",
+                Data = new LoginSuccessDTO()
+                {
+                    // Maps user to UserDTO
+                    User = mapper.Map<UserDTO>(user),
+                    Token = token
+                }
+            };
 
             return Results.Ok(response) ;
            
@@ -134,8 +138,6 @@ namespace exercise.wwwapi.EndPoints
                 new Claim(ClaimTypes.Sid, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email)
-                
-                
             };
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetValue("AppSettings:Token")));
