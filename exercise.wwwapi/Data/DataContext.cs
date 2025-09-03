@@ -45,7 +45,6 @@ namespace exercise.wwwapi.Data
 
             // Seed UserCohorts
         }
-
         public DbSet<User> Users { get; set; }
     }
 }
