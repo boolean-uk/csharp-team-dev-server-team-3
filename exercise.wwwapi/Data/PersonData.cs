@@ -1,4 +1,6 @@
 ﻿using exercise.wwwapi.Models;
+using Microsoft.AspNetCore.SignalR;
+using static System.Net.WebRequestMethods;
 
 namespace exercise.wwwapi.Data
 {
@@ -55,6 +57,14 @@ namespace exercise.wwwapi.Data
         };
         private List<string> _specialisms = new List<string> { "Software Developer", "Data Scientist", "DevOps Engineer", "Frontend Developer" };
         private List<User> _users = new List<User>();
+        private List<string> _photoUrls = new List<string> ();
+        private string baseUrl = "https://mockmind-api.uifaces.co/content/";
+        private Dictionary<string, int> urls = new Dictionary<string, int> {
+            { "human", 223 },
+            {"alien", 18 },
+            {"cartoon", 33 },
+            {"abstract", 51 }
+        };
 
         DateTime somedate = new DateTime(2020, 12, 05, 0, 0, 0, DateTimeKind.Utc);
 
@@ -62,18 +72,33 @@ namespace exercise.wwwapi.Data
         {
             Random userRandom = new Random(1);
 
+            List<string> allPhotos = new List<string>();
+            foreach (var (key, value) in urls)
+            {
+                for (int i = 1; i <= value; i++)
+                {
+                    allPhotos.Add($"{baseUrl}{key}/{i}.jpg");
+                }
+            }
+
+            // shuffle the photos
+            allPhotos = allPhotos.OrderBy(_ => userRandom.Next()).ToList();
+
             for (int x = 1; x < 300; x++)
             {
                 string FirstName = _firstnames[userRandom.Next(_firstnames.Count)];
                 string LastName = _lastnames[userRandom.Next(_lastnames.Count)];
                 string username = $"{FirstName.ToLower()}.{LastName.ToLower()}{x}";
                 string email = $"{username}@example.com".Replace(" ", "");
-                string githubUrl = $"https://github.com/{username}";
+                string githubUrl = username;
                 int phonenum = userRandom.Next(10) % 2 == 0 ? userRandom.Next(40000000, 49999999) : userRandom.Next(40000000, 49999999);
                 string mobile = $"+47{phonenum}";
                 string specialism = _specialisms[userRandom.Next(_specialisms.Count)];
                 string bio = $"Hi, I'm {FirstName} and I specialize in {specialism.Split(" ")[0]}.";
+                
                 Roles role = (Roles)(userRandom.Next(2)); // 0 = teacher, 1 = student
+                string photo = (x - 1 < allPhotos.Count) ? allPhotos[x - 1] : $"https://i.pravatar.cc/150?u={email}";
+                Console.WriteLine(photo);
 
                 User user = new User
                 {
@@ -89,7 +114,8 @@ namespace exercise.wwwapi.Data
                     Role = role,
                     PasswordHash = "somehash", //BCrypt.Net.BCrypt.HashPassword("Somerandom"), // Need to hash somehow
                     StartDate = somedate.AddDays(-userRandom.Next(30, 30)),
-                    EndDate = somedate.AddDays(userRandom.Next(31, 365))
+                    EndDate = somedate.AddDays(userRandom.Next(31, 365)),
+                    Photo = photo
                 };
 
                 _users.Add(user);
