@@ -67,11 +67,12 @@ namespace exercise.wwwapi.Data
                 string FirstName = _firstnames[userRandom.Next(_firstnames.Count)];
                 string LastName = _lastnames[userRandom.Next(_lastnames.Count)];
                 string username = $"{FirstName.ToLower()}.{LastName.ToLower()}{x}";
-                string email = $"{username}@example.com";
+                string email = $"{username}@example.com".Replace(" ", "");
                 string githubUrl = $"https://github.com/{username}";
-                string mobile = $"555-{userRandom.Next(1000000, 9999999)}";
-                string bio = $"Hi, I'm {FirstName} and I specialize in tech.";
+                int phonenum = userRandom.Next(10) % 2 == 0 ? userRandom.Next(40000000, 49999999) : userRandom.Next(40000000, 49999999);
+                string mobile = $"+47{phonenum}";
                 string specialism = _specialisms[userRandom.Next(_specialisms.Count)];
+                string bio = $"Hi, I'm {FirstName} and I specialize in {specialism.Split(" ")[0]}.";
                 Roles role = (Roles)(userRandom.Next(2)); // 0 = teacher, 1 = student
 
                 User user = new User
