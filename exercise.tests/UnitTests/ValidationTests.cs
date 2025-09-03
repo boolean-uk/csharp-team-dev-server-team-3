@@ -45,4 +45,29 @@ public class ValidationTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result, Is.EqualTo(expected));
     }
+
+    [TestCase("username", "Accepted")]
+    [TestCase("u", "Accepted")]
+    [TestCase("usernameusername", "Accepted")]
+    [TestCase("user-name", "Accepted")]
+    [TestCase("username1", "Accepted")]
+    [TestCase("", "Username must be at least one character")]
+    [TestCase("usernameusernameuser", "Username length must be shorter than 17")]
+    [TestCase("Username", "Username must only contain lowercase letters 0-9 and -")]
+    [TestCase("user_name", "Username must only contain lowercase letters 0-9 and -")]
+    [TestCase("!username", "Username must only contain lowercase letters 0-9 and -")]
+    [TestCase("invalid@", "Username must only contain lowercase letters 0-9 and -")]
+    [TestCase("invalid.", "Username must only contain lowercase letters 0-9 and -")]
+    public void ValidateUsername(string input, string expected)
+    {
+        // act 
+        // no setup needed as Validator class is static
+
+        // arrange
+        string result = Validator.Username(input);
+
+        // assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.EqualTo(expected));
+    }
 }

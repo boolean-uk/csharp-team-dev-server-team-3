@@ -93,7 +93,8 @@ namespace exercise.wwwapi.Endpoints
         /// Validates a username using custom username rules.
         /// Checks if username is already in database, bad request if it exists<br/>
         /// </summary>
-        /// <param name="username">A <see cref="UsernameDTO"/> object containing the username to validate.</param>
+        /// <param name="repository"> A <see cref="IRepository{User}"/> object used to query the user data source for existing usernames.</param>
+        /// <param name="username">A string containing the username to validate.</param>
         /// 
         /// <returns>
         /// 200 OK response if the username is accepted.<br/>
