@@ -73,5 +73,30 @@ namespace exercise.wwwapi.Helpers
             return "Accepted";
 
         }
+
+        /// <summary>
+        /// Validates a GitHub username string against a set of rules.<br/>
+        /// - Minimum length of 39 characters. <br/>
+        /// - maximum length of 1 characters.<br/>
+        /// - Only alphanumeric characters and non-consecutive hyphens allowed.
+        /// </summary>
+        /// <param name="usernameString">The username string to validate.</param>
+        /// <returns>
+        /// A string indicating the result of the validation:<br/>
+        /// - "Accepted" if the username is valid.<br/>
+        /// - A descriptive error message if any rule is violated.
+        /// </returns>
+        public static string GitUsername(string usernameString)
+        {
+            if (string.IsNullOrWhiteSpace(usernameString)) return "Username cannot be empty";
+            if (usernameString.Count() < 1) return "Length of username must be at least 1.";
+            if (usernameString.Count() > 39) return "Length of username must be at most 39.";
+
+            string regexPattern = "^(?!.*--)(?!-)(?!.*-$)[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$";
+            if (!Regex.IsMatch(usernameString, regexPattern)) return "Username must contain only alphanumeric characters that may be separated by single hyphens";
+
+            return "Accepted";
+        }
+
     }
 }

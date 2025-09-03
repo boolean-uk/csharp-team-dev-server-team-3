@@ -13,11 +13,35 @@ namespace exercise.wwwapi.Endpoints
     {
         public static void ConfigureValidationEndpoint(this WebApplication app)
         {
-            var validatiors = app.MapGroup("/validation");
-            validatiors.MapPost("/password", ValidatePassword).WithSummary("Validate a password");
-            validatiors.MapGet("/username/{username}", ValidateUsername).WithSummary("Validate a Username");
-            validatiors.MapGet("/email/{email}", ValidateEmail).WithSummary("Validate an email address");
+            var validators = app.MapGroup("/validation");
+            validators.MapPost("/password", ValidatePassword).WithSummary("Validate a password");
+            validators.MapGet("/username/{username}", ValidateUsername).WithSummary("Validate a Username");
+            validators.MapGet("/email/{email}", ValidateEmail).WithSummary("Validate an email address");
+            validators.MapGet("/validate-git-username/{gitUsername}", ValidateGitUsername).WithSummary("Validate a GitHub username");
+        }
 
+        /// <summary>
+        /// Validates a GitHub username based GitHub's rules.
+        /// Source: https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication
+        /// </summary>
+        /// <param name="repository"> A <see cref="IRepository{User}"/> object used to query the user data source for existing GitHub usernames.</param>
+        /// <param name="gitUsername">The username string to validate.</param>
+        /// <returns>
+        /// 200 OK response with a message if the username is accepted.<br/>
+        /// 400 Bad Request with a message if the username is invalid or if username already exists in database.
+        /// </returns>
+        /// <response code="200">Email is valid and accepted</response>
+        /// <response code="400">Email is invalid or already exists</response>
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        private static IResult ValidateGitUsername(IRepository<User> repository, string gitUsername)
+        {
+            if (gitUsername == null || string.IsNullOrEmpty(gitUsername)) return TypedResults.BadRequest("Something went wrong!");
+            string result = Helpers.Validator.GitUsername(gitUsername);
+            if (result != "Accepted") return TypedResults.BadRequest(result);
+            var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == gitUsername);
+            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("Email already exists");
+            return TypedResults.Ok(result);
         }
 
         /// <summary>
@@ -26,7 +50,7 @@ namespace exercise.wwwapi.Endpoints
         /// <param name="repository"> A <see cref="IRepository{User}"/> object used to query the user data source for existing emails.</param>
         /// <param name="email">The email string to validate.</param>
         /// <returns>
-        /// 200 OK response with a message if the password is accepted.<br/>
+        /// 200 OK response with a message if the email is accepted.<br/>
         /// 400 Bad Request with a message if the email is invalid or if email already exists in database.
         /// </returns>
         /// <response code="200">Email is valid and accepted</response>
