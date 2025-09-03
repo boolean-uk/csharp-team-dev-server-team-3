@@ -21,7 +21,7 @@ namespace exercise.wwwapi.Data
             "Marie", "Ingrid", "Inger", "Astrid",
             "Kari", "Solveig", "Ingeborg", "Marit",
             "Ole", "Arne", "Jan", "Per",
-            "Johan", "Lars", "Bjørn", "Olav",
+            "Johan", "Lars", "Bjorn", "Olav",
             "Knut", "Nora", "Lucas", "Emma",
             "Olivia", "Noa", "Sofie", "Johannes"
         };
@@ -36,23 +36,22 @@ namespace exercise.wwwapi.Data
             "Nilsen", "Jensen", "Kristiansen", "Risa",
             "Roland", "Stormo", "Beck", "Giske",
             "Holme", "Holm", "Fauske", "Dokken",
-            "Grønningen","Søyland", "Lier", "Vedvik",
-            "Gruber", "Meyer","Schmid","Weber","Иванов",
-            "Abdullayev", "Hüseynov", "Cəfərov", "Peeters",
-            "De Smet", "Claes", "Mertens","Delemović",
+            "Gronningen","Soeyland", "Lier", "Vedvik",
+            "Gruber", "Meyer","Schmid","Weber",
+            "Abdullayev", "Huseynov", "Ceferov", "Peeters",
+            "De Smet", "Claes", "Mertens","Delemovic",
             "Horvat", "Novak", "Tamm", "Saar", "Sepp",
             "Ivanov", "Pavlov", "Korhonen", "Laine", "Bernard",
-            "Dubois", "Durand", "Moreau", "Robert","მამედოვი",
-            "ბოლქვაძე", "Müller", "Schmidt", "Hoffmann",
-            "Μυταράς", "Thorlacius", "Walsh", "Kelly",
-            "O'Sullivan", "Murphy","Rossi", "Russo",
+            "Dubois", "Durand", "Moreau", "Robert",
+            "Muller", "Schmidt", "Hoffmann", "Thorlacius", "Walsh", "Kelly",
+            "OSullivan", "Murphy","Rossi", "Russo",
             "Ferrari", "Esposito","Morina", "Braun", 
             "Faber","Borg","Rusu","De Jong", "De Vries",
             "Bakker","Stojanovski", "Nowak","Silva","Popa",
-            "Golob", "García", "González", "Andersson","Bianchi",
+            "Golob", "Garcia", "Gonzalez", "Andersson","Bianchi",
             "Kaya", "Melnyk", "Boyko", "Smith", "Williams", "Brown",
-            "Pèrez","López", "Rodríguez", "Grigoryan",
-            "渡辺", "高橋", "小林","전","柳","장","박","dela Cruz","Reyes",
+            "Perez","Lopez", "Rodriguez", "Grigoryan",
+            "Kim","Lee","dela Cruz","Reyes",
             "Ramos","Perera", "de Silva", "Rathnayake",
         };
         private List<string> _specialisms = new List<string> { "Software Developer", "Data Scientist", "DevOps Engineer", "Frontend Developer" };
@@ -88,7 +87,7 @@ namespace exercise.wwwapi.Data
             {
                 string FirstName = _firstnames[userRandom.Next(_firstnames.Count)];
                 string LastName = _lastnames[userRandom.Next(_lastnames.Count)];
-                string username = $"{FirstName.ToLower()}.{LastName.ToLower()}{x}";
+                string username = $"{FirstName.ToLower().Replace(" ", "")}.{LastName.ToLower()}{x}";
                 string email = $"{username}@example.com".Replace(" ", "");
                 string githubUrl = username;
                 int phonenum = userRandom.Next(10) % 2 == 0 ? userRandom.Next(40000000, 49999999) : userRandom.Next(40000000, 49999999);
