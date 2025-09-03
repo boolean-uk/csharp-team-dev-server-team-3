@@ -16,19 +16,29 @@ namespace exercise.wwwapi.Endpoints
             var validatiors = app.MapGroup("/validation");
             validatiors.MapPost("/password", ValidatePassword).WithSummary("Validate a password");
             validatiors.MapGet("/username/{username}", ValidateUsername).WithSummary("Validate a Username");
-            validatiors.MapPost("/email", ValidateEmail).WithSummary("Validate an email address");
+            validatiors.MapGet("/email/{email}", ValidateEmail).WithSummary("Validate an email address");
 
         }
 
-
+        /// <summary>
+        /// Validates an email using custom email rules.
+        /// </summary>
+        /// <param name="repository"> A <see cref="IRepository{User}"/> object used to query the user data source for existing emails.</param>
+        /// <param name="email">The email string to validate.</param>
+        /// <returns>
+        /// 200 OK response with a message if the password is accepted.<br/>
+        /// 400 Bad Request with a message if the email is invalid or if email already exists in database.
+        /// </returns>
+        /// <response code="200">Email is valid and accepted</response>
+        /// <response code="400">Email is invalid or already exists</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult ValidateEmail(IRepository<User> repository, EmailDTO email)
+        private static IResult ValidateEmail(IRepository<User> repository, string email)
         {
-            string result = Helpers.Validator.Email(email.Email);
-            if (result == null) return TypedResults.BadRequest("Something went wrong!");
+            if (email == null || string.IsNullOrEmpty(email)) return TypedResults.BadRequest("Something went wrong!");
+            string result = Helpers.Validator.Email(email);
             if (result != "Accepted") return TypedResults.BadRequest(result);
-            var emailExists = repository.GetAllFiltered(q => q.Email == email.Email);
+            var emailExists = repository.GetAllFiltered(q => q.Email == email);
             if (emailExists.Count() != 0) return TypedResults.BadRequest("Email already exists");
             return TypedResults.Ok(result);
         }
