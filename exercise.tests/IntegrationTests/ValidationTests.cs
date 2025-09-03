@@ -18,7 +18,7 @@ namespace exercise.tests.IntegrationTests
         [SetUp]
         public void SetUp()
         {
-            // Arrange
+            // Arrange 
             _factory = new WebApplicationFactory<Program>();
             _client = _factory.CreateClient();
         }
