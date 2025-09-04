@@ -106,14 +106,12 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateUsername(IRepository<User> repository, [FromQuery] string username)
         {
-            if (username == null || string.IsNullOrEmpty(username))
-                return TypedResults.BadRequest("Empty input");
+            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest("Empty input");
             string result = Helpers.Validator.Username(username);
-            if (result == null) return TypedResults.BadRequest("Empty response from server");
+            if (result != "Accepted") return TypedResults.BadRequest(result);
             var usernameExists = repository.GetAllFiltered(q => q.Username == username);
             if (usernameExists.Count() != 0) return TypedResults.BadRequest("Username is already in use");
-            if (result == "Accepted") return TypedResults.Ok(result);
-            return TypedResults.BadRequest(result);
+            return TypedResults.Ok(result);
         }
     }
 }
