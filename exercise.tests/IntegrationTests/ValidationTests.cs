@@ -143,24 +143,39 @@ namespace exercise.tests.IntegrationTests
 
 
 
-
+        // TODO: Add cases or separate methods for the git-username endpoint
         [TestCase("username", HttpStatusCode.OK)]
-        [TestCase("u", HttpStatusCode.OK)]
-        [TestCase("usernameusername", HttpStatusCode.OK)]
         [TestCase("user-name", HttpStatusCode.OK)]
+        [TestCase("user-name-valid", HttpStatusCode.OK)]
         [TestCase("username1", HttpStatusCode.OK)]
-        [TestCase("usernameusernameuser", HttpStatusCode.BadRequest)]
-        [TestCase("Username", HttpStatusCode.BadRequest)]
-        [TestCase("user_name", HttpStatusCode.BadRequest)]
-        [TestCase("!username", HttpStatusCode.BadRequest)]
-        [TestCase("invalid@", HttpStatusCode.BadRequest)]
-        [TestCase("invalid.", HttpStatusCode.BadRequest)]
+        [TestCase("user1name", HttpStatusCode.OK)]
+        [TestCase("1user-name", HttpStatusCode.OK)]
+        [TestCase("user-name-1", HttpStatusCode.OK)]
+        [TestCase("u", HttpStatusCode.OK)]
+        [TestCase("1", HttpStatusCode.OK)]
+        [TestCase("usernameusernameusernameusernameusernameusername", HttpStatusCode.BadRequest)]
+        [TestCase("-username", HttpStatusCode.BadRequest)]
+        [TestCase("username-", HttpStatusCode.BadRequest)]
+        [TestCase("-username-", HttpStatusCode.BadRequest)]
+        [TestCase("-", HttpStatusCode.BadRequest)]
+        [TestCase("user--name", HttpStatusCode.BadRequest)]
+        [TestCase("user--name-invalid", HttpStatusCode.BadRequest)]
+        [TestCase("username!", HttpStatusCode.BadRequest)]
+        [TestCase("username?", HttpStatusCode.BadRequest)]
+        [TestCase("username+", HttpStatusCode.BadRequest)]
+        [TestCase("username`", HttpStatusCode.BadRequest)]
+        [TestCase("username´", HttpStatusCode.BadRequest)]
+        [TestCase("username/", HttpStatusCode.BadRequest)]
+        [TestCase("username%", HttpStatusCode.BadRequest)]
+        [TestCase("username_", HttpStatusCode.BadRequest)]
+        [TestCase("user name", HttpStatusCode.BadRequest)]
+        [TestCase("øsername", HttpStatusCode.BadRequest)]
         public async Task ValidateUsernameStatus(string input, HttpStatusCode statusCode)
         {
             // Arrange
 
             // Act
-            var response = await _client.GetAsync($"/validation/username/{input}");
+            var response = await _client.GetAsync($"/validation/username?username={input}");
             Console.WriteLine($"{statusCode} : {response.StatusCode}");
 
             // Assert
@@ -169,22 +184,37 @@ namespace exercise.tests.IntegrationTests
 
 
         [TestCase("username", "Accepted")]
-        [TestCase("u", "Accepted")]
-        [TestCase("usernameusername", "Accepted")]
         [TestCase("user-name", "Accepted")]
+        [TestCase("user-name-valid", "Accepted")]
         [TestCase("username1", "Accepted")]
-        [TestCase("usernameusernameuser", "Username length must be shorter than 17")]
-        [TestCase("Username", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("user_name", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("!username", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("invalid@", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("invalid.", "Username must only contain lowercase letters 0-9 and -")]
+        [TestCase("user1name", "Accepted")]
+        [TestCase("1user-name", "Accepted")]
+        [TestCase("user-name-1", "Accepted")]
+        [TestCase("u", "Accepted")]
+        [TestCase("1", "Accepted")]
+        [TestCase("usernameusernameusernameusernameusernameusername", "Length of username must be at most 39.")]
+        [TestCase("-username", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username-", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("-username-", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("-", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("user--name", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("user--name-invalid", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username!", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username?", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username+", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username`", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username´", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username/", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username%", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("username_", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("user name", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
+        [TestCase("øsername", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
         public async Task ValidateUsernameMessage(string input, string expected)
         {
             // Arrange
 
             // Act
-            var response = await _client.GetAsync($"/validation/username/{input}");
+            var response = await _client.GetAsync($"/validation/username?username={input}");
             Console.WriteLine("r,", response);
 
             // Assert

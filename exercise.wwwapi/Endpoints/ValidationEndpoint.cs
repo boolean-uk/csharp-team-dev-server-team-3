@@ -16,8 +16,8 @@ namespace exercise.wwwapi.Endpoints
             var validators = app.MapGroup("/validation");
             validators.MapPost("/password", ValidatePassword).WithSummary("Validate a password");
             validators.MapGet("/email/{email}", ValidateEmail).WithSummary("Validate an email address");
-            validators.MapGet("/username/{username}", ValidateUsername).WithSummary("Validate a username");
-            validators.MapGet("/git-username/{gitUsername}", ValidateGitUsername).WithSummary("Validate a GitHub username");
+            validators.MapGet("/username", ValidateUsername).WithSummary("Validate a username");
+            validators.MapGet("/git-username", ValidateGitUsername).WithSummary("Validate a GitHub username");
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace exercise.wwwapi.Endpoints
         /// <response code="400">Email is invalid or already exists</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult ValidateGitUsername(IRepository<User> repository, string gitUsername)
+        private static IResult ValidateGitUsername(IRepository<User> repository, [FromQuery] string gitUsername)
         {
             if (gitUsername == null || string.IsNullOrEmpty(gitUsername)) return TypedResults.BadRequest("Something went wrong!");
             string result = Helpers.Validator.Username(gitUsername);
@@ -104,7 +104,7 @@ namespace exercise.wwwapi.Endpoints
         /// <response code="400">Username is invalid or validation failed.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult ValidateUsername(IRepository<User> repository, string username)
+        private static IResult ValidateUsername(IRepository<User> repository, [FromQuery] string username)
         {
             if (username == null || string.IsNullOrEmpty(username))
                 return TypedResults.BadRequest("Empty input");
