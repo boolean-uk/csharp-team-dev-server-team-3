@@ -23,6 +23,8 @@ var config = new ConfigurationSettings();
 builder.Services.AddScoped<IConfigurationSettings, ConfigurationSettings>();
 builder.Services.AddScoped<IRepository<User>, Repository<User>>();
 builder.Services.AddScoped<ILogger, Logger<string>>();
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddDbContext<DataContext>(options => {
     
     //options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
@@ -30,6 +32,7 @@ builder.Services.AddDbContext<DataContext>(options => {
     options.LogTo(message => Debug.WriteLine(message));
 
 });
+
 
 builder.Services.AddAuthentication(x =>
 {

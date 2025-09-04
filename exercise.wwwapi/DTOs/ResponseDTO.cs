@@ -2,12 +2,12 @@
 
 namespace exercise.wwwapi.DTOs
 {
-    public class ResponseDTO<T> where T : new()
+    public class ResponseDTO<T>
     {
         [JsonPropertyName("status")]
-        public string Status { get; set; }
+        public required string Status { get; set; }
 
     [JsonPropertyName("data")]
-    public T Data { get; set; } = new T();
+    public T? Data { get; set; }
     }
 }
