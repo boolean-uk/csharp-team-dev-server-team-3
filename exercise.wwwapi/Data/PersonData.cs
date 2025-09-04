@@ -87,7 +87,7 @@ namespace exercise.wwwapi.Data
             {
                 string FirstName = _firstnames[userRandom.Next(_firstnames.Count)];
                 string LastName = _lastnames[userRandom.Next(_lastnames.Count)];
-                string username = $"{FirstName.ToLower().Replace(" ", "")}.{LastName.ToLower()}{x}";
+                string username = $"{FirstName.ToLower().Replace(" ", "")}-{LastName.ToLower()}{x}";
                 string email = $"{username}@example.com".Replace(" ", "");
                 string githubUrl = username;
                 int phonenum = userRandom.Next(10) % 2 == 0 ? userRandom.Next(40000000, 49999999) : userRandom.Next(40000000, 49999999);

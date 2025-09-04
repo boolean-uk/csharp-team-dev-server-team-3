@@ -192,5 +192,54 @@ namespace exercise.tests.IntegrationTests
             Console.WriteLine("Message: " + message);
             Assert.That(message?.ToString(), Is.EqualTo(expected));
         }
+
+
+        [TestCase("donald-haaland3", "Username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
+        public async Task ValidateUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/username?username={input}");
+            Console.WriteLine("r,", response);
+
+            // Assert
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            JsonNode? message = null;
+            if (!string.IsNullOrWhiteSpace(contentString))
+            {
+                message = JsonNode.Parse(contentString);
+            }
+
+            Console.WriteLine("Message: " + message);
+            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+        }
+
+        [TestCase("donald-haaland3", "GitHub username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
+        public async Task ValidateGitUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/git-username?username={input}");
+            Console.WriteLine("r,", response);
+
+            // Assert
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            JsonNode? message = null;
+            if (!string.IsNullOrWhiteSpace(contentString))
+            {
+                message = JsonNode.Parse(contentString);
+            }
+
+            Console.WriteLine("Message: " + message);
+            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+        }
     }
 }

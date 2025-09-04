@@ -37,6 +37,7 @@ namespace exercise.tests.Helpers
                 ("username?", "Username must contain only alphanumeric characters that may be separated by single hyphens"),
                 ("username+", "Username must contain only alphanumeric characters that may be separated by single hyphens"),
                 ("username`", "Username must contain only alphanumeric characters that may be separated by single hyphens"),
+                ("user.name", "Username must contain only alphanumeric characters that may be separated by single hyphens"),
                 ("username´", "Username must contain only alphanumeric characters that may be separated by single hyphens"),
                 ("username/", "Username must contain only alphanumeric characters that may be separated by single hyphens"),
                 ("username%", "Username must contain only alphanumeric characters that may be separated by single hyphens"),

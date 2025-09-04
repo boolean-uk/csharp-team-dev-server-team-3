@@ -40,7 +40,7 @@ namespace exercise.wwwapi.Endpoints
             string result = Helpers.Validator.Username(username);
             if (result != "Accepted") return TypedResults.BadRequest(result);
             var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == username);
-            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username already exists");
+            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username is already in use");
             return TypedResults.Ok(result);
         }
 
