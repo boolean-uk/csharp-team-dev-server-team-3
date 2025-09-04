@@ -1,4 +1,6 @@
-﻿using exercise.wwwapi.DTOs.Validation;
+﻿using exercise.tests.Helpers;
+using exercise.wwwapi.DTOs.Validation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Net;
@@ -139,52 +141,43 @@ namespace exercise.tests.IntegrationTests
         }
 
 
-
-
-
-
-
-        [TestCase("username", HttpStatusCode.OK)]
-        [TestCase("u", HttpStatusCode.OK)]
-        [TestCase("usernameusername", HttpStatusCode.OK)]
-        [TestCase("user-name", HttpStatusCode.OK)]
-        [TestCase("username1", HttpStatusCode.OK)]
-        [TestCase("usernameusernameuser", HttpStatusCode.BadRequest)]
-        [TestCase("Username", HttpStatusCode.BadRequest)]
-        [TestCase("user_name", HttpStatusCode.BadRequest)]
-        [TestCase("!username", HttpStatusCode.BadRequest)]
-        [TestCase("invalid@", HttpStatusCode.BadRequest)]
-        [TestCase("invalid.", HttpStatusCode.BadRequest)]
-        public async Task ValidateUsernameStatus(string input, HttpStatusCode statusCode)
+        /// <summary>
+        /// Testing username validation. Asserting that response status codes are correct.
+        /// Test cases are defined in <see cref="UsernameValidationTestData"/>.
+        /// </summary>
+        /// <param name="endpoint"> The endpoint. All cases run with endpoints "username" and "git-username".</param>
+        /// <param name="input"> The provided input.</param>
+        /// <param name="expected"> The expected response status code.</param>
+        /// <returns></returns>
+        [Test, TestCaseSource(typeof(UsernameValidationTestData), nameof(UsernameValidationTestData.UsernameValidationStatusCases))]
+        public async Task ValidateUsernameStatus(string endpoint, string input, HttpStatusCode expected)
         {
             // Arrange
 
             // Act
-            var response = await _client.GetAsync($"/validation/username/{input}");
-            Console.WriteLine($"{statusCode} : {response.StatusCode}");
+            var response = await _client.GetAsync($"/validation/{endpoint}?username={input}");
+            Console.WriteLine($"{expected} : {response.StatusCode}");
 
             // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(statusCode));
+            Assert.That(response.StatusCode, Is.EqualTo(expected));
         }
 
 
-        [TestCase("username", "Accepted")]
-        [TestCase("u", "Accepted")]
-        [TestCase("usernameusername", "Accepted")]
-        [TestCase("user-name", "Accepted")]
-        [TestCase("username1", "Accepted")]
-        [TestCase("usernameusernameuser", "Username length must be shorter than 17")]
-        [TestCase("Username", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("user_name", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("!username", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("invalid@", "Username must only contain lowercase letters 0-9 and -")]
-        [TestCase("invalid.", "Username must only contain lowercase letters 0-9 and -")]
-        public async Task ValidateUsernameMessage(string input, string expected)
+        /// <summary>
+        /// Testing username validation. Asserting that response messages are correct.
+        /// Test cases are defined in <see cref="UsernameValidationTestData"/>.
+        /// </summary>
+        /// <param name="endpoint"> The endpoint. All cases run with endpoints "username" and "git-username".</param>
+        /// <param name="input"> The provided input.</param>
+        /// <param name="expected"> The expected response message.</param>
+        /// <returns></returns>
+        [Test, TestCaseSource(typeof(UsernameValidationTestData), nameof(UsernameValidationTestData.UsernameValidationMessageCases))]
+        public async Task ValidateUsernameMessage(string endpoint, string input, string expected)
         {
             // Arrange
 
             // Act
-            var response = await _client.GetAsync($"/validation/username/{input}");
+            var response = await _client.GetAsync($"/validation/{endpoint}?username={input}");
             Console.WriteLine("r,", response);
 
             // Assert
@@ -198,6 +191,55 @@ namespace exercise.tests.IntegrationTests
 
             Console.WriteLine("Message: " + message);
             Assert.That(message?.ToString(), Is.EqualTo(expected));
+        }
+
+
+        [TestCase("donald-haaland3", "Username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
+        public async Task ValidateUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/username?username={input}");
+            Console.WriteLine("r,", response);
+
+            // Assert
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            JsonNode? message = null;
+            if (!string.IsNullOrWhiteSpace(contentString))
+            {
+                message = JsonNode.Parse(contentString);
+            }
+
+            Console.WriteLine("Message: " + message);
+            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+        }
+
+        [TestCase("donald-haaland3", "GitHub username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
+        public async Task ValidateGitUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/git-username?username={input}");
+            Console.WriteLine("r,", response);
+
+            // Assert
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            JsonNode? message = null;
+            if (!string.IsNullOrWhiteSpace(contentString))
+            {
+                message = JsonNode.Parse(contentString);
+            }
+
+            Console.WriteLine("Message: " + message);
+            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
     }
 }

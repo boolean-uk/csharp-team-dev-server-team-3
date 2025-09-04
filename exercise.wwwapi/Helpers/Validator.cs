@@ -39,32 +39,6 @@ namespace exercise.wwwapi.Helpers
             if (!Regex.IsMatch(passwordString, regexPattern)) return "Missing special character";
             return "Accepted";
         }
-
-
-        /// <summary>
-        /// Validates a username string against a set of security rules.<br/>
-        /// - Minimum length of 1 characters. <br/>
-        /// - maximum length of 1 characters.<br/>
-        /// - Only a-z 0-9 and - allowed.
-        /// </summary>
-        /// <param name="usernameString">The username string to validate.</param>
-        /// <returns>
-        /// A string indicating the result of the validation:<br/>
-        /// - "Accepted" if the password meets all criteria.<br/>
-        /// - A descriptive error message if any rule is violated.
-        /// </returns>
-        public static string Username(string usernameString)
-        {
-
-            if (usernameString.Count() > 17) return "Username length must be shorter than 17";
-            if (usernameString.Count() < 1) return "Username must be at least one character";
-
-            string regexPattern = "^[a-z0-9-]+$";
-            if (!Regex.IsMatch(usernameString, regexPattern)) return "Username must only contain lowercase letters 0-9 and -";
-
-            return "Accepted";
-        }
-
           
         public static string Email(string emailString)
         {
@@ -73,5 +47,30 @@ namespace exercise.wwwapi.Helpers
             return "Accepted";
 
         }
+
+        /// <summary>
+        /// Validates a username based GitHub's rules.
+        /// Source: https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication
+        /// - Minimum length of 39 characters. <br/>
+        /// - maximum length of 1 characters.<br/>
+        /// - Only alphanumeric characters and non-consecutive hyphens allowed.
+        /// </summary>
+        /// <param name="usernameString">The username string to validate.</param>
+        /// <returns>
+        /// A string indicating the result of the validation:<br/>
+        /// - "Accepted" if the username is valid.<br/>
+        /// - A descriptive error message if any rule is violated.
+        /// </returns>
+        public static string Username(string usernameString)
+        {
+            if (usernameString.Count() < 1) return "Length of username must be at least 1.";
+            if (usernameString.Count() > 39) return "Length of username must be at most 39.";
+
+            string regexPattern = "^(?!.*--)(?!-)(?!.*-$)[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$";
+            if (!Regex.IsMatch(usernameString, regexPattern)) return "Username must contain only alphanumeric characters that may be separated by single hyphens";
+
+            return "Accepted";
+        }
+
     }
 }
