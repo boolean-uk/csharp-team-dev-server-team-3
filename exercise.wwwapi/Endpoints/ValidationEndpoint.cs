@@ -34,12 +34,12 @@ namespace exercise.wwwapi.Endpoints
         /// <response code="400">Email is invalid or already exists</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult ValidateGitUsername(IRepository<User> repository, [FromQuery] string gitUsername)
+        private static IResult ValidateGitUsername(IRepository<User> repository, [FromQuery] string username)
         {
-            if (gitUsername == null || string.IsNullOrEmpty(gitUsername)) return TypedResults.BadRequest("Something went wrong!");
-            string result = Helpers.Validator.Username(gitUsername);
+            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest("Something went wrong!");
+            string result = Helpers.Validator.Username(username);
             if (result != "Accepted") return TypedResults.BadRequest(result);
-            var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == gitUsername);
+            var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == username);
             if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username already exists");
             return TypedResults.Ok(result);
         }
