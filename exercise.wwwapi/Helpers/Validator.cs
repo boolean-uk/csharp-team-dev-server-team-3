@@ -39,32 +39,6 @@ namespace exercise.wwwapi.Helpers
             if (!Regex.IsMatch(passwordString, regexPattern)) return "Missing special character";
             return "Accepted";
         }
-
-
-        ///// <summary>
-        ///// Validates a username string against a set of security rules.<br/>
-        ///// - Minimum length of 1 characters. <br/>
-        ///// - maximum length of 1 characters.<br/>
-        ///// - Only a-z 0-9 and - allowed.
-        ///// </summary>
-        ///// <param name="usernameString">The username string to validate.</param>
-        ///// <returns>
-        ///// A string indicating the result of the validation:<br/>
-        ///// - "Accepted" if the password meets all criteria.<br/>
-        ///// - A descriptive error message if any rule is violated.
-        ///// </returns>
-        //public static string Username(string usernameString)
-        //{
-
-        //    if (usernameString.Count() > 17) return "Username length must be shorter than 17";
-        //    if (usernameString.Count() < 1) return "Username must be at least one character";
-
-        //    string regexPattern = "^[a-z0-9-]+$";
-        //    if (!Regex.IsMatch(usernameString, regexPattern)) return "Username must only contain lowercase letters 0-9 and -";
-
-        //    return "Accepted";
-        //}
-
           
         public static string Email(string emailString)
         {
