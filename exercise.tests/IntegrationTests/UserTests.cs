@@ -114,8 +114,8 @@ namespace exercise.tests.IntegrationTests
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
             RegisterRequestDTO body = new RegisterRequestDTO
             {
-                email = "oyvind.perez1@example.com",
-                password = "Somehash1!"
+                email = "oyvind-perez1@example.com",
+                password = "SuperHash!4"
             };
             var json = JsonSerializer.Serialize(body);
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
@@ -134,12 +134,15 @@ namespace exercise.tests.IntegrationTests
             Console.WriteLine("Message: " + message);
             // Assert
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["data"], Is.Not.Null);
+            Assert.That(message["data"]["token"], Is.Not.Null);
         }
 
-        [TestCase("oyvind.perez1@example.com", "short1!")] // Password too short
-        [TestCase("oyvind.perez1@example.com", "alllowercase1!")] // Missing uppercase
-        [TestCase("oyvind.perez1@example.com", "NoNumber!")] // Missing number
-        [TestCase("oyvind.perez1@example.com", "NoSpecialChar1")] // Missing special character
+        [TestCase("oyvind-perez1@example.com", "short1!")] // Password too short
+        [TestCase("oyvind-perez1@example.com", "alllowercase1!")] // Missing uppercase
+        [TestCase("oyvind-perez1@example.com", "NoNumber!")] // Missing number
+        [TestCase("oyvind-perez1@example.com", "NoSpecialChar1")] // Missing special character
         public async Task Login_failure(string email, string password)
         {
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
@@ -166,6 +169,9 @@ namespace exercise.tests.IntegrationTests
             Console.WriteLine("Message: " + message);
             // Assert
             Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.OK));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message["data"], Is.Not.Null);
+            Assert.That(message["data"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
         }
     }
 }
