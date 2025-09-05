@@ -47,6 +47,8 @@ namespace exercise.wwwapi.EndPoints
                 };
             return TypedResults.Ok(response);
         }
+
+        // should 200OK be 201Created?
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
@@ -54,11 +56,9 @@ namespace exercise.wwwapi.EndPoints
             //user exists
             if (service.GetAll().Where(u => u.Email == request.email).Any()) return Results.Conflict(new ResponseDTO<RegisterFailureDTO>() { Status = "Fail" });
 
-
-            // TODO: Add salt to password?
-            // TODO: Ensure valid password
-            //string validationResult = Validator.Password(request.password);
-            //if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = "Fail" });
+            // check valid password
+            string validationResult = Validator.Password(request.password);
+            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = validationResult });
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
 
@@ -91,17 +91,21 @@ namespace exercise.wwwapi.EndPoints
             //if (string.IsNullOrEmpty(request.username)) request.username = request.email;
 
             // HAVE to check for valid email/password before verifying if the user already exists, otherwise breach of security
-            // TODO: validate password
+            
+            // Check for valid password
+            string validationResult = Validator.Password(request.password);
+            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Status = "Fail", Data = "Invalid email and/or password provided" });
 
 
-            //user doesn't exist
+            //user doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             if (!service.GetAll().Where(u => u.Email == request.email).Any()) return Results.BadRequest(new Payload<Object>() { status = "User does not exist", data = new { email="Invalid email and/or password provided"} });
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
            
-
+            
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
+                // should probably be 401 unauthorized
                 return Results.BadRequest(new Payload<Object>() { status = "fail", data = new LoginFailureDTO() });
             }
 
