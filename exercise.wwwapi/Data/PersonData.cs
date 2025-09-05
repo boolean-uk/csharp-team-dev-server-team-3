@@ -64,6 +64,12 @@ namespace exercise.wwwapi.Data
             {"cartoon", 33 },
             {"abstract", 51 }
         };
+        private List<string> _passwordHashes = new List<string> {
+            "$2a$11$mbfii1SzR9B7ZtKbYydLOuAPBSA2ziAP0CrsdU8QgubGo2afw7Wuy", // Timianerkul1!
+            "$2a$11$5ttNr5DmMLFlyVVv7PFkQOhIstdGTBmSdhMHaQcUOZ8zAgsCqFT6e", // SuperHash!4
+            "$2a$11$KBLC6riEn/P78lLCwyi0MO9DrlxapLoGhCfdgXwLU2s44P.StKO/6", // Neidintulling!l33t
+            "$2a$11$DFMtyLv243uk2liVbzCxXeshisouexhitDg5OUuBU.4LVn//QG5O."  // lettPassord123!
+        };
 
         DateTime somedate = new DateTime(2020, 12, 05, 0, 0, 0, DateTimeKind.Utc);
 
@@ -94,7 +100,7 @@ namespace exercise.wwwapi.Data
                 string mobile = $"+47{phonenum}";
                 string specialism = _specialisms[userRandom.Next(_specialisms.Count)];
                 string bio = $"Hi, I'm {FirstName} and I specialize in {specialism.Split(" ")[0]}.";
-                
+                string password = _passwordHashes[userRandom.Next(_passwordHashes.Count)];
                 Roles role = (Roles)(userRandom.Next(2)); // 0 = teacher, 1 = student
                 string photo = (x - 1 < allPhotos.Count) ? allPhotos[x - 1] : $"https://i.pravatar.cc/150?u={email}";
                 Console.WriteLine(photo);
@@ -111,7 +117,7 @@ namespace exercise.wwwapi.Data
                     Bio = bio,
                     Specialism = specialism,
                     Role = role,
-                    PasswordHash = "somehash", //BCrypt.Net.BCrypt.HashPassword("Somerandom"), // Need to hash somehow
+                    PasswordHash = password,
                     StartDate = somedate.AddDays(-userRandom.Next(30, 30)),
                     EndDate = somedate.AddDays(userRandom.Next(31, 365)),
                     Photo = photo
