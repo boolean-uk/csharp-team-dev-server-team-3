@@ -178,7 +178,6 @@ namespace exercise.tests.IntegrationTests
 
             // Act
             var response = await _client.GetAsync($"/validation/{endpoint}?username={input}");
-            Console.WriteLine("r,", response);
 
             // Assert
             var contentString = await response.Content.ReadAsStringAsync();
@@ -194,7 +193,7 @@ namespace exercise.tests.IntegrationTests
         }
 
 
-        [TestCase("donald-haaland3", "Username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase("donald-esposito121", "Username is already in use", HttpStatusCode.BadRequest)]
         [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
         {
@@ -218,7 +217,7 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
 
-        [TestCase("donald-haaland3", "GitHub username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase("donald-esposito121", "GitHub username is already in use", HttpStatusCode.BadRequest)]
         [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateGitUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
         {
@@ -226,7 +225,6 @@ namespace exercise.tests.IntegrationTests
 
             // Act
             var response = await _client.GetAsync($"/validation/git-username?username={input}");
-            Console.WriteLine("r,", response);
 
             // Assert
             var contentString = await response.Content.ReadAsStringAsync();
