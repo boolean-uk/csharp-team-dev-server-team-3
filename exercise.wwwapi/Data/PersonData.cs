@@ -103,7 +103,7 @@ namespace exercise.wwwapi.Data
                 string password = _passwordHashes[userRandom.Next(_passwordHashes.Count)];
                 Roles role = (Roles)(userRandom.Next(2)); // 0 = teacher, 1 = student
                 string photo = (x - 1 < allPhotos.Count) ? allPhotos[x - 1] : $"https://i.pravatar.cc/150?u={email}";
-                Console.WriteLine(photo);
+                //Console.WriteLine(photo);
 
                 User user = new User
                 {

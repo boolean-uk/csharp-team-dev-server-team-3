@@ -114,7 +114,7 @@ namespace exercise.tests.IntegrationTests
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
             RegisterRequestDTO body = new RegisterRequestDTO
             {
-                email = "oyvind-perez1@example.com",
+                email = "oyvind.perez1@example.com",
                 password = "SuperHash!4"
             };
             var json = JsonSerializer.Serialize(body);
