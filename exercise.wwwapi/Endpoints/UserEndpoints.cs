@@ -98,7 +98,7 @@ namespace exercise.wwwapi.EndPoints
 
 
             //user doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
-            if (!service.GetAll().Where(u => u.Email == request.email).Any()) return Results.BadRequest(new Payload<Object>() { status = "User does not exist", data = new { email="Invalid email and/or password provided"} });
+            if (!service.GetAll().Where(u => u.Email == request.email).Any()) return Results.BadRequest(new Payload<Object>() { status = $"{request.email} does not exist", data = new { email="Invalid email and/or password provided"} });
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
            
