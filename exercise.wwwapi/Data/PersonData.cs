@@ -93,8 +93,8 @@ namespace exercise.wwwapi.Data
             {
                 string FirstName = _firstnames[userRandom.Next(_firstnames.Count)];
                 string LastName = _lastnames[userRandom.Next(_lastnames.Count)];
-                string username = $"{FirstName.ToLower().Replace(" ", "")}-{LastName.ToLower()}{x}";
-                string email = $"{username}@example.com".Replace(" ", "");
+                string username = $"{FirstName.ToLower().Replace(" ", "")}-{LastName.ToLower().Replace(" ", "")}{x}";
+                string email = $"{username.Replace("-",".")}@example.com".Replace(" ", "");
                 string githubUrl = username;
                 int phonenum = userRandom.Next(10) % 2 == 0 ? userRandom.Next(40000000, 49999999) : userRandom.Next(40000000, 49999999);
                 string mobile = $"+47{phonenum}";
@@ -103,7 +103,7 @@ namespace exercise.wwwapi.Data
                 string password = _passwordHashes[userRandom.Next(_passwordHashes.Count)];
                 Roles role = (Roles)(userRandom.Next(2)); // 0 = teacher, 1 = student
                 string photo = (x - 1 < allPhotos.Count) ? allPhotos[x - 1] : $"https://i.pravatar.cc/150?u={email}";
-                Console.WriteLine(photo);
+                //Console.WriteLine(photo);
 
                 User user = new User
                 {
