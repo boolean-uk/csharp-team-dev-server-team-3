@@ -123,6 +123,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapFallback(async context =>
+{
+    context.Response.StatusCode = 404; // Not Found
+    context.Response.ContentType = "application/json";
+    await context.Response.WriteAsJsonAsync(new
+    {
+        Status = 404,
+        Message = "Endpoint not found"
+    });
+});
+
 app.ConfigureAuthApi();
 
 app.ConfigureSecureApi();
