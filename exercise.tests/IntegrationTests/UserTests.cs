@@ -139,10 +139,10 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message["data"]["token"], Is.Not.Null);
         }
 
-        [TestCase("oyvind-perez1@example.com", "short1!")] // Password too short
-        [TestCase("oyvind-perez1@example.com", "alllowercase1!")] // Missing uppercase
-        [TestCase("oyvind-perez1@example.com", "NoNumber!")] // Missing number
-        [TestCase("oyvind-perez1@example.com", "NoSpecialChar1")] // Missing special character
+        [TestCase("oyvind.perez1@example.com", "short1!")] // Password too short
+        [TestCase("oyvind.perez1@example.com", "alllowercase1!")] // Missing uppercase
+        [TestCase("oyvind.perez1@example.com", "NoNumber!")] // Missing number
+        [TestCase("oyvind.perez1@example.com", "NoSpecialChar1")] // Missing special character
         public async Task Login_failure(string email, string password)
         {
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
