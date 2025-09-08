@@ -7,7 +7,7 @@ Content-Type: application/json
   "lastName": "moby",
   "email": "moby@moby.moby",
   "bio": "mobymobymoby",
-  "githubUrl": "mobymobymoby",
+  "githubUsername": "mobymobymoby",
   "password": "mobymobymoby"
 }
 

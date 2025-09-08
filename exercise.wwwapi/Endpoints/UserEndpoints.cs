@@ -70,7 +70,7 @@ namespace exercise.wwwapi.EndPoints
             user.FirstName = !string.IsNullOrEmpty(request.firstName) ? request.firstName : string.Empty;
             user.LastName = !string.IsNullOrEmpty(request.lastName) ? request.lastName : string.Empty;
             user.Bio = !string.IsNullOrEmpty(request.bio) ? request.bio : string.Empty;
-            user.GithubUrl = !string.IsNullOrEmpty(request.githubUrl) ? request.githubUrl : string.Empty;
+            user.GithubUsername = !string.IsNullOrEmpty(request.githubUsername) ? request.githubUsername : string.Empty;
 
             service.Insert(user);
             service.Save();
