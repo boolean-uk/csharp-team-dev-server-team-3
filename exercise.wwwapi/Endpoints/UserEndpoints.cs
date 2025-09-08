@@ -27,8 +27,8 @@ namespace exercise.wwwapi.EndPoints
             users.MapPost("/", Register).WithSummary("Create user");
             users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
             users.MapGet("/{id}", GetUserById).WithSummary("Get user by user id");
+            users.MapPatch("/{id}", UpdateUser).WithSummary("Update a user");
             app.MapPost("/login", Login).WithSummary("Localhost Login");
-            app.MapPatch("/{id}", UpdateUser).WithSummary("Update a user");
         }
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -126,10 +126,70 @@ namespace exercise.wwwapi.EndPoints
         {
             return TypedResults.Ok();
         }
+
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> UpdateUser(int id)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch)
         {
-            return TypedResults.Ok();
+            var user = repository.GetById(id);
+
+            if (user == null) return TypedResults.NotFound();
+
+            if (userPatch.Username != null)
+            {
+                // Validate username
+                if (Validator.Username(userPatch.Username) != "Accepted") return TypedResults.BadRequest("Invalid username");
+                var usernameExists = repository.GetAllFiltered(q => q.Username == userPatch.Username);
+                if (usernameExists.Count() != 0) return TypedResults.BadRequest("Username is already in use");
+                // Update
+                user.Username = userPatch.Username;
+            }
+            if (userPatch.GitHubUsername != null)
+            {
+                // Validate github username
+                if (Validator.Username(userPatch.GitHubUsername) != "Accepted") return TypedResults.BadRequest("Invalid GitHub username");
+                var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == userPatch.GitHubUsername);
+                if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username is already in use");
+                // Update
+                user.GithubUrl = userPatch.GitHubUsername;
+            }
+            if (userPatch.Email != null)
+            {
+                // Validate username
+                if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest("Invalid email");
+                var emailExists = repository.GetAllFiltered(q => q.Email == userPatch.Email);
+                if (emailExists.Count() != 0) return TypedResults.BadRequest("Email is already in use");
+                // Update
+                user.Email = userPatch.Email;
+            }
+            if (userPatch.Password != null)
+            {
+                // Validate username
+                if (Validator.Password(userPatch.Username) != "Accepted") return TypedResults.BadRequest("Invalid password");
+                // Hash
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(userPatch.Username);
+                // Update
+                user.PasswordHash = passwordHash;
+            }
+            if (userPatch.FirstName != null) user.FirstName = userPatch.FirstName;
+            if (userPatch.LastName != null) user.LastName = userPatch.LastName;
+            if (userPatch.Mobile != null) user.Mobile = userPatch.Mobile;
+            if (userPatch.Role != null) 
+            {
+                if (userPatch.Role == 0) user.Role = Roles.student;
+                if (userPatch.Role == 1) user.Role = Roles.teacher;
+                return TypedResults.BadRequest("Role does not exist");
+            }
+            if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
+            //if (userPatch.Cohort != null) user.Cohort = userPatch.Cohort; ADD COHORT LATER
+            if (userPatch.StartDate != null) user.StartDate = (DateTime)userPatch.StartDate;
+            if (userPatch.EndDate != null) user.EndDate = (DateTime)userPatch.EndDate;
+            if (userPatch.Bio != null) user.Bio = userPatch.Bio;
+
+            repository.Update(user);
+            repository.Save();
+
+            return TypedResults.Ok(user);
         }
         private static string CreateToken(User user, IConfigurationSettings config)
         {
