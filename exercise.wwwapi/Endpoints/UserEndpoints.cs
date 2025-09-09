@@ -132,9 +132,12 @@ namespace exercise.wwwapi.EndPoints
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch)
         {
+            if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) return TypedResults.NoContent();
+
             var user = repository.GetById(id);
 
             if (user == null) return TypedResults.NotFound();
@@ -169,7 +172,7 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.Password != null)
             {
                 // Validate username
-                if (Validator.Password(userPatch.Username) != "Accepted") return TypedResults.BadRequest("Invalid password");
+                if (Validator.Password(userPatch.Password) != "Accepted") return TypedResults.BadRequest("Invalid password");
                 // Hash
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(userPatch.Username);
                 // Update
@@ -193,7 +196,7 @@ namespace exercise.wwwapi.EndPoints
             repository.Update(user);
             repository.Save();
 
-            return TypedResults.Ok(user);
+            return TypedResults.Ok(userPatch);
         }
         private static string CreateToken(User user, IConfigurationSettings config)
         {
