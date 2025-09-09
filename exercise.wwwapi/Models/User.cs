@@ -28,8 +28,8 @@ namespace exercise.wwwapi.Models
         [Column("bio")]
         public string Bio { get; set; } = string.Empty;
 
-        [Column("githubUrl")]
-        public string GithubUrl { get; set; } = string.Empty;
+        [Column("GithubUsername")]
+        public string GithubUsername { get; set; } = string.Empty;
 
         [Column("mobile")]
         public string Mobile { get; set; } = string.Empty;
