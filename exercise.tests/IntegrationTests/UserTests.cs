@@ -170,8 +170,8 @@ namespace exercise.tests.IntegrationTests
             // Assert
             Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.OK));
             Assert.That(message, Is.Not.Null);
-            Assert.That(message["data"], Is.Not.Null);
-            Assert.That(message["data"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
+            Assert.That(message["message"], Is.Not.Null);
+            Assert.That(message["message"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
         }
     }
 }
