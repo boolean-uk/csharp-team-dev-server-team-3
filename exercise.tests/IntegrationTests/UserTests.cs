@@ -1,5 +1,7 @@
-﻿using exercise.wwwapi.DTOs.Login;
+﻿using exercise.wwwapi.DTOs;
+using exercise.wwwapi.DTOs.Login;
 using exercise.wwwapi.DTOs.Register;
+using exercise.wwwapi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
@@ -173,5 +175,176 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message["data"], Is.Not.Null);
             Assert.That(message["data"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
         }
+
+        [Test]
+        public async Task UpdateUserSuccess()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "username", "roman-olsen13"},
+                { "email", "roman.olsen13@example.com"},
+                { "password", "aGoodPassword!200" },
+                { "role", 0}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        }
+
+        [Test]
+        public async Task UpdateUserNoContent()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>{};
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 1;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+        }
+
+        [Test]
+        public async Task UpdateUserInvalidUsername()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "username", "roman--olsen13"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserInvalidGitHubUsername()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "gitHubUsername", "roman--olsen13"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserInvalidEmail()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "email", "roman.olsen13@.e.com"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserInvalidPassword()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "password", "nope!"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserInvalidRole()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "role", 10}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserUsernameExists()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "username", "nigel-nowak2"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserGitHubUsernameExists()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "gitHubUsername", "nigel-nowak2"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
+        [Test]
+        public async Task UpdateUserEmailExists()
+        {
+            var fieldsToUpdate = new Dictionary<string, object?>
+            {
+                { "email", "nigel.nowak2@example.com"}
+            };
+
+            var json = JsonSerializer.Serialize(fieldsToUpdate);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            int userId = 13;
+            var response = await _client.PatchAsync($"/users/{userId}", content);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        }
+
     }
 }

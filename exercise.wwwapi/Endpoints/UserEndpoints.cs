@@ -142,7 +142,7 @@ namespace exercise.wwwapi.EndPoints
 
             if (user == null) return TypedResults.NotFound();
 
-            if (userPatch.Username != null)
+            if (userPatch.Username != null && userPatch.Username != user.Username)
             {
                 // Validate username
                 if (Validator.Username(userPatch.Username) != "Accepted") return TypedResults.BadRequest("Invalid username");
@@ -151,7 +151,7 @@ namespace exercise.wwwapi.EndPoints
                 // Update
                 user.Username = userPatch.Username;
             }
-            if (userPatch.GitHubUsername != null)
+            if (userPatch.GitHubUsername != null && userPatch.GitHubUsername != user.GithubUrl)
             {
                 // Validate github username
                 if (Validator.Username(userPatch.GitHubUsername) != "Accepted") return TypedResults.BadRequest("Invalid GitHub username");
@@ -160,7 +160,7 @@ namespace exercise.wwwapi.EndPoints
                 // Update
                 user.GithubUrl = userPatch.GitHubUsername;
             }
-            if (userPatch.Email != null)
+            if (userPatch.Email != null && userPatch.Email != user.Email)
             {
                 // Validate username
                 if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest("Invalid email");
@@ -183,9 +183,9 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.Mobile != null) user.Mobile = userPatch.Mobile;
             if (userPatch.Role != null) 
             {
-                if (userPatch.Role == 0) user.Role = Roles.student;
-                if (userPatch.Role == 1) user.Role = Roles.teacher;
-                return TypedResults.BadRequest("Role does not exist");
+                if (userPatch.Role == 0) { user.Role = Roles.student; }
+                else if (userPatch.Role == 1) { user.Role = Roles.teacher; }
+                else {return TypedResults.BadRequest("Role does not exist");}
             }
             if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
             //if (userPatch.Cohort != null) user.Cohort = userPatch.Cohort; ADD COHORT LATER
