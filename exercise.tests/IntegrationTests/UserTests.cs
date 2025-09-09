@@ -64,10 +64,10 @@ namespace exercise.tests.IntegrationTests
         }
 
         // Uncomment these when email/username validation has been implemented in the endpoint
-        //[TestCase("validuser", "plainaddress", "ValidPass1!")] // Invalid email format
-        //[TestCase("validuser", "user@domain.c", "ValidPass1!")] // Invalid email domain
-        //[TestCase("ThisIsWayTooLong123", "valid@email.com", "ValidPass1!")] // Username too long
-        //[TestCase("", "valid@email.com", "ValidPass1!")] // Username too short, change logic so it doesnt add uniqueid to username
+        [TestCase("validuser", "plainaddress", "ValidPass1!")] // Invalid email format
+        [TestCase("validuser", "user@domain.c", "ValidPass1!")] // Invalid email domain
+        [TestCase("ThisIsWayTooLong123ThisIsWayTooLong123ThisIsWayTooLong123", "valid@email.com", "ValidPass1!")] // Username too long
+        [TestCase("", "valid@email.com", "ValidPass1!")] // Username too short, change logic so it doesnt add uniqueid to username
         [TestCase("validuser", "valid@email.com", "short1!")] // Password too short
         [TestCase("validuser", "valid@email.com", "alllowercase1!")] // Missing uppercase
         [TestCase("validuser", "valid@email.com", "NoNumber!")] // Missing number
@@ -77,14 +77,16 @@ namespace exercise.tests.IntegrationTests
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
             string firstName = "Ole";
             string lastName = "Petterson";
+
+            string k = username.Length > 0 ? username +uniqueId : "";
             RegisterRequestDTO body = new RegisterRequestDTO
             {
-                email = $"myemailVery{uniqueId}@gmail.com",
+                email = $"{uniqueId}{email}",
                 firstName = firstName,
                 lastName = lastName,
                 bio = "Min bio er vakker",
-                githubUsername = $"{username}{uniqueId}",
-                username = $"{username}{uniqueId}",
+                githubUsername = username,
+                username =username,
                 password = password
             };
             

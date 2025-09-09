@@ -53,12 +53,22 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
         {
-            //user exists
-            if (service.GetAll().Where(u => u.Email == request.email).Any()) return Results.Conflict(new ResponseDTO<RegisterFailureDTO>() { Status = "Fail" });
-
+            // syntax checks
             // check valid password
             string validationResult = Validator.Password(request.password);
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = validationResult });
+            // check valid email
+            string emailValidation = Validator.Email(request.email);
+            if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = emailValidation });
+            // check valid username
+            string usernameValidation = Validator.Username(request.username);
+            if (usernameValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = usernameValidation });
+
+            // ecxist checks
+            // check if email is in database
+            var emailExists = service.GetAllFiltered(q => q.Email == request.email);
+            if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = "Email already exists" });
+            
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
 
@@ -96,9 +106,11 @@ namespace exercise.wwwapi.EndPoints
             string validationResult = Validator.Password(request.password);
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Status = "Fail", Data = "Invalid email and/or password provided" });
 
+            //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
+            //check if email is in database
+            var emailExists = service.GetAllFiltered(q => q.Email == request.email);
+            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = "Email dosen't exists" });
 
-            //user doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
-            if (!service.GetAll().Where(u => u.Email == request.email).Any()) return Results.BadRequest(new Payload<Object>() { status = $"{request.email} does not exist", data = new { email="Invalid email and/or password provided"} });
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
            
