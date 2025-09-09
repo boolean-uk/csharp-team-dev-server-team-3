@@ -151,14 +151,14 @@ namespace exercise.wwwapi.EndPoints
                 // Update
                 user.Username = userPatch.Username;
             }
-            if (userPatch.GitHubUsername != null && userPatch.GitHubUsername != user.GithubUrl)
+            if (userPatch.GithubUsername != null && userPatch.GithubUsername != user.GithubUsername)
             {
                 // Validate github username
-                if (Validator.Username(userPatch.GitHubUsername) != "Accepted") return TypedResults.BadRequest("Invalid GitHub username");
-                var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUrl == userPatch.GitHubUsername);
+                if (Validator.Username(userPatch.GithubUsername) != "Accepted") return TypedResults.BadRequest("Invalid GitHub username");
+                var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUsername == userPatch.GithubUsername);
                 if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username is already in use");
                 // Update
-                user.GithubUrl = userPatch.GitHubUsername;
+                user.GithubUsername = userPatch.GithubUsername;
             }
             if (userPatch.Email != null && userPatch.Email != user.Email)
             {
