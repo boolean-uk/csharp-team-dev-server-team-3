@@ -244,5 +244,28 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
+
+        [TestCase("nigel.nowak2@example.com", "Email already exists", HttpStatusCode.BadRequest)]
+        [TestCase("valid@email.com.no", "Accepted", HttpStatusCode.OK)]
+        public async Task ValidateEmailExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
+        {
+            // Arrange
+
+            // Act
+            var response = await _client.GetAsync($"/validation/email/{input}");
+
+            // Assert
+            var contentString = await response.Content.ReadAsStringAsync();
+
+            JsonNode? message = null;
+            if (!string.IsNullOrWhiteSpace(contentString))
+            {
+                message = JsonNode.Parse(contentString);
+            }
+
+            Console.WriteLine("Message: " + message);
+            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+        }
     }
 }

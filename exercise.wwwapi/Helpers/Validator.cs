@@ -39,7 +39,16 @@ namespace exercise.wwwapi.Helpers
             if (!Regex.IsMatch(passwordString, regexPattern)) return "Missing special character";
             return "Accepted";
         }
-          
+
+        /// <summary>
+        /// Validates an email address.
+        /// </summary>
+        /// <param name="emailString">The email string to validate.</param>
+        /// <returns>
+        /// A string indicating the result of the validation:<br/>
+        /// - "Accepted" if the email is valid.<br/>
+        /// - A descriptive error message if any rule is violated.
+        /// </returns>
         public static string Email(string emailString)
         {
             if (!new EmailAddressAttribute().IsValid(emailString)) return "Invalid email format";
