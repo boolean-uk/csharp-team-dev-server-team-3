@@ -1,10 +1,12 @@
 ﻿
+using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.Register;
 using exercise.wwwapi.DTOs.Validation;
 using exercise.wwwapi.Helpers;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using System.ComponentModel.DataAnnotations;
 
 namespace exercise.wwwapi.Endpoints
@@ -36,12 +38,13 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateGitUsername(IRepository<User> repository, [FromQuery] string username)
         {
-            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest("Something went wrong!");
+            
+            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
             string result = Helpers.Validator.Username(username);
             if (result != "Accepted") return TypedResults.BadRequest(result);
             var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUsername == username);
-            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username is already in use");
-            return TypedResults.Ok(result);
+            if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "GitHub username is already in use" });
+            return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
 
         /// <summary>
@@ -59,12 +62,12 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateEmail(IRepository<User> repository, string email)
         {
-            if (email == null || string.IsNullOrEmpty(email)) return TypedResults.BadRequest("Something went wrong!");
+            if (email == null || string.IsNullOrEmpty(email)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
             string result = Helpers.Validator.Email(email);
             if (result != "Accepted") return TypedResults.BadRequest(result);
             var emailExists = repository.GetAllFiltered(q => q.Email == email);
-            if (emailExists.Count() != 0) return TypedResults.BadRequest("Email already exists");
-            return TypedResults.Ok(result);
+            if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Email already exists" });
+            return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
   
         /// <summary>
@@ -82,11 +85,11 @@ namespace exercise.wwwapi.Endpoints
         private static IResult ValidatePassword(PasswordDTO passwordDTO)
         {
             if (passwordDTO == null || string.IsNullOrEmpty(passwordDTO.password))
-                return TypedResults.BadRequest("Something went wrong!");
+                return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
             string result = Helpers.Validator.Password(passwordDTO.password);
-            if (result == null) return TypedResults.BadRequest("Something went wrong!");
-            else if (result == "Accepted") return TypedResults.Ok(result);
-            else return TypedResults.BadRequest(result);
+            if (result == null) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
+            else if (result == "Accepted") return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
+            else return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
         }
 
         /// <summary>
@@ -106,12 +109,12 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateUsername(IRepository<User> repository, [FromQuery] string username)
         {
-            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest("Empty input");
+            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Empty input" });
             string result = Helpers.Validator.Username(username);
-            if (result != "Accepted") return TypedResults.BadRequest(result);
+            if (result != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
             var usernameExists = repository.GetAllFiltered(q => q.Username == username);
-            if (usernameExists.Count() != 0) return TypedResults.BadRequest("Username is already in use");
-            return TypedResults.Ok(result);
+            if (usernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Username is already in use" });
+            return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
     }
 }
