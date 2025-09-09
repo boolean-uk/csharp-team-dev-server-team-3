@@ -11,6 +11,6 @@ namespace exercise.wwwapi.DTOs
         public string firstName { get; set; }
         public string lastName { get; set; }
         public string bio { get; set; }
-        public string githubUrl { get; set; } 
+        public string githubUsername { get; set; } 
     }
 }

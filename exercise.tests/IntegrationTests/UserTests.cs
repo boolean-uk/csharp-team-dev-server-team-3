@@ -42,7 +42,7 @@ namespace exercise.tests.IntegrationTests
                 firstName = "Ole",
                 lastName = "Petterson",
                 bio = "Min bio er vakker",
-                githubUrl = $"ole-gmailpersotn{uniqueId}",
+                githubUsername = $"ole-gmailpersotn{uniqueId}",
                 username= $"ole-perrston{uniqueId}",
                 password = "someR21!password"
             };
@@ -85,7 +85,7 @@ namespace exercise.tests.IntegrationTests
                 firstName = firstName,
                 lastName = lastName,
                 bio = "Min bio er vakker",
-                githubUrl = $"{username}{uniqueId}",
+                githubUsername = $"{username}{uniqueId}",
                 username = $"{username}{uniqueId}",
                 password = password
             };
