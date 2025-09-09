@@ -86,7 +86,8 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?.ToString(), Is.EqualTo(expected));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expected));
         }
 
         [TestCase("valid@email.com", HttpStatusCode.OK)]
@@ -137,7 +138,8 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?.ToString(), Is.EqualTo(expected));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expected));
         }
 
 
@@ -189,7 +191,8 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?.ToString(), Is.EqualTo(expected));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expected));
         }
 
 
@@ -213,7 +216,8 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
 
@@ -236,7 +240,8 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
     }
