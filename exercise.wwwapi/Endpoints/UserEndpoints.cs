@@ -142,6 +142,7 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch)
         {
             if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) return TypedResults.NoContent();
