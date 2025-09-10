@@ -264,7 +264,7 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?.ToString(), Is.EqualTo(expectedMessage));
+            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
     }
