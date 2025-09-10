@@ -131,6 +131,7 @@ namespace exercise.wwwapi.EndPoints
            
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> GetUserById(IRepository<User> service, int id)
         {
             var user = service.GetById(id);
