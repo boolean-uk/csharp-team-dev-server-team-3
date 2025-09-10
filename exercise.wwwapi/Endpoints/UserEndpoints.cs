@@ -61,11 +61,7 @@ namespace exercise.wwwapi.EndPoints
             // check valid email
             string emailValidation = Validator.Email(request.email);
             if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = emailValidation });
-            // check valid username
-            string usernameValidation = Validator.Username(request.username);
-            if (usernameValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = usernameValidation });
 
-            // ecxist checks
             // check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
             if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<Object>() { Message = "Fail" });
@@ -75,13 +71,8 @@ namespace exercise.wwwapi.EndPoints
 
             var user = new User();
 
-            user.Username = !string.IsNullOrEmpty(request.username) ? request.username : request.email;
             user.PasswordHash = passwordHash;
             user.Email = request.email; 
-            user.FirstName = !string.IsNullOrEmpty(request.firstName) ? request.firstName : string.Empty;
-            user.LastName = !string.IsNullOrEmpty(request.lastName) ? request.lastName : string.Empty;
-            user.Bio = !string.IsNullOrEmpty(request.bio) ? request.bio : string.Empty;
-            user.GithubUsername = !string.IsNullOrEmpty(request.githubUsername) ? request.githubUsername : string.Empty;
 
             service.Insert(user);
             service.Save();

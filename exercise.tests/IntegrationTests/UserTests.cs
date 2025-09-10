@@ -43,11 +43,6 @@ namespace exercise.tests.IntegrationTests
 
             RegisterRequestDTO body = new RegisterRequestDTO {
                 email = $"{uniqueId}{email}",
-                firstName = "Ole",
-                lastName = "Petterson",
-                bio = "Min bio er vakker",
-                githubUsername = uniqueUsername,
-                username = uniqueUsername,
                 password = password
             };
             var json = JsonSerializer.Serialize(body);
@@ -80,11 +75,6 @@ namespace exercise.tests.IntegrationTests
             RegisterRequestDTO body = new RegisterRequestDTO
             {
                 email = $"{uniqueId}{email}",
-                firstName = firstName,
-                lastName = lastName,
-                bio = "Min bio er vakker",
-                githubUsername = uniqueUsername,
-                username =uniqueUsername,
                 password = password
             };
             
