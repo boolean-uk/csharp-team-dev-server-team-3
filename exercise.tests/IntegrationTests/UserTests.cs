@@ -37,14 +37,15 @@ namespace exercise.tests.IntegrationTests
         {
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
 
+            string k = username.Length > 0 ? username + uniqueId : "";
 
             RegisterRequestDTO body = new RegisterRequestDTO {
-                email = $"{email}",
+                email = $"{uniqueId}{email}",
                 firstName = "Ole",
                 lastName = "Petterson",
                 bio = "Min bio er vakker",
-                githubUsername = username,
-                username = username,
+                githubUsername = k,
+                username = k,
                 password = password
             };
             var json = JsonSerializer.Serialize(body);
@@ -73,15 +74,15 @@ namespace exercise.tests.IntegrationTests
             string firstName = "Ole";
             string lastName = "Petterson";
 
-            string k = username.Length > 0 ? username +uniqueId : "";
+            string k = username.Length > 0 ? username + uniqueId : "";
             RegisterRequestDTO body = new RegisterRequestDTO
             {
                 email = $"{uniqueId}{email}",
                 firstName = firstName,
                 lastName = lastName,
                 bio = "Min bio er vakker",
-                githubUsername = username,
-                username =username,
+                githubUsername = k,
+                username =k,
                 password = password
             };
             
