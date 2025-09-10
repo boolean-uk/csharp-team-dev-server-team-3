@@ -61,7 +61,7 @@ namespace exercise.tests.IntegrationTests
 
             Console.WriteLine("Message: " + message);
             // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
         }
 
         [Test, TestCaseSource(typeof(UserTestCases), nameof(UserTestCases.InvalidRegisterCases))]
@@ -94,7 +94,7 @@ namespace exercise.tests.IntegrationTests
 
             Console.WriteLine("Message: " + message);
             // Assert
-            Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.Created));
         }
 
 

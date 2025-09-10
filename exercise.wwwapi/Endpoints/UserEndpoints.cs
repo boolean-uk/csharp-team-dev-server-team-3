@@ -48,8 +48,8 @@ namespace exercise.wwwapi.EndPoints
             return TypedResults.Ok(response);
         }
 
-        // should 200OK be 201Created?
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
         {
@@ -83,7 +83,7 @@ namespace exercise.wwwapi.EndPoints
                 Data = mapper.Map<UserDTO>(user)
             };
 
-            return Results.Ok(response);
+            return Results.Created($"/users/{response.Data.id}", response.Data);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -131,6 +131,7 @@ namespace exercise.wwwapi.EndPoints
            
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> GetUserById(IRepository<User> service, int id)
         {
             var user = service.GetById(id);
@@ -141,6 +142,7 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch)
         {
             if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) return TypedResults.NoContent();
