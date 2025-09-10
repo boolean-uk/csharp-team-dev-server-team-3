@@ -37,10 +37,9 @@ namespace exercise.tests.IntegrationTests
         {
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
 
-            string k = username.Length > 0 ? username + uniqueId : "";
 
             RegisterRequestDTO body = new RegisterRequestDTO {
-                email = $"{uniqueId}{email}",
+                email = $"{email}",
                 firstName = "Ole",
                 lastName = "Petterson",
                 bio = "Min bio er vakker",
@@ -143,7 +142,7 @@ namespace exercise.tests.IntegrationTests
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
             LoginRequestDTO body = new LoginRequestDTO
             {
-                email = email,
+                email = $"{uniqueId}{email}",
                 password = password
             };
 
@@ -165,8 +164,8 @@ namespace exercise.tests.IntegrationTests
             // Assert
             Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.OK));
             Assert.That(message, Is.Not.Null);
-            Assert.That(message["data"], Is.Not.Null);
-            Assert.That(message["data"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
+            Assert.That(message["status"], Is.Not.Null);
+            Assert.That(message["status"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
         }
     }
 }

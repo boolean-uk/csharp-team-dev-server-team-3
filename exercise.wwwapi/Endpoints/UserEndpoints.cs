@@ -109,7 +109,7 @@ namespace exercise.wwwapi.EndPoints
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = "Email dosen't exists" });
+            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status  = "Invalid email and/or password provided" });
 
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
