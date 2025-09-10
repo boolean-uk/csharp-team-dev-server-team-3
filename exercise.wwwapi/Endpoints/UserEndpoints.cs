@@ -48,7 +48,6 @@ namespace exercise.wwwapi.EndPoints
             return TypedResults.Ok(response);
         }
 
-        // should 200OK be 201Created?
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
