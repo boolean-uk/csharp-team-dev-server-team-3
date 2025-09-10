@@ -14,6 +14,6 @@ namespace exercise.wwwapi.DTOs.Posts
         public DateTime? UpdatedAt { get; set; }
         public required int NumLikes { get; set; }
 
-        public ICollection<PostComment> Comments { get; set; } = new List<PostComment>();
+        public ICollection<PostCommentDTO> Comments { get; set; } = new List<PostCommentDTO>();
     }
 }
