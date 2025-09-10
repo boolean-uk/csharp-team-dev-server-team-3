@@ -188,7 +188,8 @@ namespace exercise.wwwapi.EndPoints
                 else {return TypedResults.BadRequest("Role does not exist");}
             }
             if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
-            //if (userPatch.Cohort != null) user.Cohort = userPatch.Cohort; ADD COHORT LATER
+            // TODO: Add cohort support after implementing the Cohort model and adding it to user.
+            //if (userPatch.Cohort != null) user.Cohort = userPatch.Cohort;
             if (userPatch.StartDate != null) user.StartDate = (DateTime)userPatch.StartDate;
             if (userPatch.EndDate != null) user.EndDate = (DateTime)userPatch.EndDate;
             if (userPatch.Bio != null) user.Bio = userPatch.Bio;
