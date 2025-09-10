@@ -83,7 +83,7 @@ namespace exercise.wwwapi.EndPoints
                 Data = mapper.Map<UserDTO>(user)
             };
 
-            return Results.Created($"/users/{response.Data.id}", response);
+            return Results.Created($"/users/{response.Data.id}", response.Data);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
