@@ -42,7 +42,7 @@ namespace exercise.wwwapi.EndPoints
                     : results.ToList() };
             ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>() 
                 {
-                    Status = "success", 
+                    Message = "success", 
                     Data = userData 
                 };
             return TypedResults.Ok(response);
@@ -53,21 +53,22 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
         {
+
             // syntax checks
             // check valid password
             string validationResult = Validator.Password(request.password);
-            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = validationResult });
+            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = validationResult });
             // check valid email
             string emailValidation = Validator.Email(request.email);
-            if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = emailValidation });
+            if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = emailValidation });
             // check valid username
             string usernameValidation = Validator.Username(request.username);
-            if (usernameValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = usernameValidation });
+            if (usernameValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = usernameValidation });
 
             // ecxist checks
             // check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status = "Email already exists" });
+            if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<Object>() { Message = "Fail" });
             
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
@@ -87,7 +88,7 @@ namespace exercise.wwwapi.EndPoints
 
             ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
             {
-                Status = "success",
+                Message = "success",
                 Data = mapper.Map<UserDTO>(user)
             };
 
@@ -104,12 +105,13 @@ namespace exercise.wwwapi.EndPoints
             
             // Check for valid password
             string validationResult = Validator.Password(request.password);
-            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Status = "Fail", Data = "Invalid email and/or password provided" });
+            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
 
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<RegisterFailureDTO>() { Status  = "Invalid email and/or password provided" });
+            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided"});
+
 
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
@@ -118,14 +120,14 @@ namespace exercise.wwwapi.EndPoints
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
                 // should probably be 401 unauthorized
-                return Results.BadRequest(new Payload<Object>() { status = "fail", data = new LoginFailureDTO() });
+                return Results.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided" });
             }
 
             string token = CreateToken(user, config);
 
             ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
             {
-                Status = "success",
+                Message = "success",
                 Data = new LoginSuccessDTO()
                 {
                     // Maps user to UserDTO
