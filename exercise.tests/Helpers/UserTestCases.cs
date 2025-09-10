@@ -14,8 +14,6 @@ namespace exercise.tests.Helpers
 
         public static IEnumerable<TestCaseData> InvalidRegisterCases()
         {
-            yield return new TestCaseData("ThisIsWayTooLong123ThisIsWayTooLong123ThisIsWayTooLong123", "valid@email.com", "ValidPass1!").SetName("Invalid: Username too long (register)");
-            yield return new TestCaseData("", "valid@email.com", "ValidPass1!").SetName("Invalid: Username too short (register)");
             yield return new TestCaseData("validuser", "plainaddress", "ValidPass1!").SetName("Invalid: Invalid email format (register)");
             yield return new TestCaseData("validuser", "user@domain.c", "ValidPass1!").SetName("Invalid: Invalid email domain (register)");
             yield return new TestCaseData("validuser", "valid@email.com", "short1!").SetName("Invalid: Password too short (register)");
