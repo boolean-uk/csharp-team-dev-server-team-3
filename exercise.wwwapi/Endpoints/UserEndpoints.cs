@@ -27,8 +27,8 @@ namespace exercise.wwwapi.EndPoints
             users.MapPost("/", Register).WithSummary("Create user");
             users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
             users.MapGet("/{id}", GetUserById).WithSummary("Get user by user id");
+            users.MapPatch("/{id}", UpdateUser).WithSummary("Update a user");
             app.MapPost("/login", Login).WithSummary("Localhost Login");
-            app.MapPatch("/{id}", UpdateUser).WithSummary("Update a user");
         }
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -144,10 +144,74 @@ namespace exercise.wwwapi.EndPoints
         {
             return TypedResults.Ok();
         }
+
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> UpdateUser(int id)
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch)
         {
-            return TypedResults.Ok();
+            if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) return TypedResults.NoContent();
+
+            var user = repository.GetById(id);
+
+            if (user == null) return TypedResults.NotFound();
+
+            if (userPatch.Username != null && userPatch.Username != user.Username)
+            {
+                // Validate username
+                if (Validator.Username(userPatch.Username) != "Accepted") return TypedResults.BadRequest("Invalid username");
+                var usernameExists = repository.GetAllFiltered(q => q.Username == userPatch.Username);
+                if (usernameExists.Count() != 0) return TypedResults.BadRequest("Username is already in use");
+                // Update
+                user.Username = userPatch.Username;
+            }
+            if (userPatch.GithubUsername != null && userPatch.GithubUsername != user.GithubUsername)
+            {
+                // Validate github username
+                if (Validator.Username(userPatch.GithubUsername) != "Accepted") return TypedResults.BadRequest("Invalid GitHub username");
+                var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUsername == userPatch.GithubUsername);
+                if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username is already in use");
+                // Update
+                user.GithubUsername = userPatch.GithubUsername;
+            }
+            if (userPatch.Email != null && userPatch.Email != user.Email)
+            {
+                // Validate username
+                if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest("Invalid email");
+                var emailExists = repository.GetAllFiltered(q => q.Email == userPatch.Email);
+                if (emailExists.Count() != 0) return TypedResults.BadRequest("Email is already in use");
+                // Update
+                user.Email = userPatch.Email;
+            }
+            if (userPatch.Password != null)
+            {
+                // Validate username
+                if (Validator.Password(userPatch.Password) != "Accepted") return TypedResults.BadRequest("Invalid password");
+                // Hash
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(userPatch.Username);
+                // Update
+                user.PasswordHash = passwordHash;
+            }
+            if (userPatch.FirstName != null) user.FirstName = userPatch.FirstName;
+            if (userPatch.LastName != null) user.LastName = userPatch.LastName;
+            if (userPatch.Mobile != null) user.Mobile = userPatch.Mobile;
+            if (userPatch.Role != null) 
+            {
+                if (userPatch.Role == 0) { user.Role = Roles.student; }
+                else if (userPatch.Role == 1) { user.Role = Roles.teacher; }
+                else {return TypedResults.BadRequest("Role does not exist");}
+            }
+            if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
+            // TODO: Add cohort support after implementing the Cohort model and adding it to user.
+            //if (userPatch.Cohort != null) user.Cohort = userPatch.Cohort;
+            if (userPatch.StartDate != null) user.StartDate = (DateTime)userPatch.StartDate;
+            if (userPatch.EndDate != null) user.EndDate = (DateTime)userPatch.EndDate;
+            if (userPatch.Bio != null) user.Bio = userPatch.Bio;
+
+            repository.Update(user);
+            repository.Save();
+
+            return TypedResults.Ok(userPatch);
         }
         private static string CreateToken(User user, IConfigurationSettings config)
         {
