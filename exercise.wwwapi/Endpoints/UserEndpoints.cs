@@ -49,7 +49,8 @@ namespace exercise.wwwapi.EndPoints
         }
 
         // should 200OK be 201Created?
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
         {
@@ -83,7 +84,7 @@ namespace exercise.wwwapi.EndPoints
                 Data = mapper.Map<UserDTO>(user)
             };
 
-            return Results.Ok(response);
+            return Results.Created($"/users/{response.Data.id}", response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
