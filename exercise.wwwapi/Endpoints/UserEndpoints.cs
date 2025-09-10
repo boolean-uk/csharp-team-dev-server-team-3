@@ -126,9 +126,11 @@ namespace exercise.wwwapi.EndPoints
            
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetUserById(int id)
+        public static async Task<IResult> GetUserById(IRepository<User> service, int id)
         {
-            return TypedResults.Ok();
+            var user = service.GetById(id);
+            if (user == null) return TypedResults.NotFound();
+            return TypedResults.Ok(user);
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> UpdateUser(int id)
