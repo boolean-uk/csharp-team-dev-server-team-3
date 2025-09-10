@@ -333,5 +333,13 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
+        [TestCase("1", HttpStatusCode.OK)]
+        [TestCase("10000000", HttpStatusCode.NotFound)]
+        public async Task GetUserByIdTest(string id, HttpStatusCode responseStatus)
+        {
+            var response = await _client.GetAsync($"/users/{id}");
+            Assert.That(response.StatusCode, Is.EqualTo(responseStatus));
+
+        }
     }
 }
