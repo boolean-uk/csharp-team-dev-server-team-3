@@ -199,7 +199,7 @@ namespace exercise.tests.IntegrationTests
 
             var data = message["data"];
             Assert.That(data, Is.Not.Null);
-            Assert.That(data!.AsArray().Count, Is.GreaterThanOrEqualTo(0));
+            Assert.That(data.AsArray(), Has.Count.GreaterThanOrEqualTo(0));
 
             foreach (var post in data.AsArray())
             {
@@ -256,7 +256,7 @@ namespace exercise.tests.IntegrationTests
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PutAsync($"/posts/{postId}", requestBody);
+            var response = await _client.PatchAsync($"/posts/{postId}", requestBody);
             var contentString = await response.Content.ReadAsStringAsync();
 
             JsonNode? message = null;

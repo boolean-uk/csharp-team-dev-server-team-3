@@ -16,7 +16,7 @@ namespace exercise.wwwapi.Endpoints
             var posts = app.MapGroup("posts");
             posts.MapPost("/", CreatePost).WithSummary("Create post");
             posts.MapGet("/", GetAllPosts).WithSummary("Get all posts");
-            posts.MapPatch("/{id}", GetAllPosts).WithSummary("Update a certain post");
+            posts.MapPatch("/{id}", UpdatePost).WithSummary("Update a certain post");
             posts.MapDelete("/{id}", GetAllPosts).WithSummary("Remove a certain post");
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -65,21 +65,28 @@ namespace exercise.wwwapi.Endpoints
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, int id, UpdatePostDTO request)
         {
-            if (request.GetType().GetProperties().Length > 0 && request.GetType().GetProperties().All((p) => p.GetValue(request) == null)) return TypedResults.NoContent();
-
+            if (string.IsNullOrWhiteSpace(request.Content)) return TypedResults.BadRequest(new ResponseDTO<object>{
+                    Message = "Content cannot be empty"
+                });
+            
+            // TODO: Add new getbyid that uses includes
             var post = service.GetById(id);
 
-            if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Missing post" });
+            if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
 
-            if (string.IsNullOrEmpty(request.Content)) post.Content = request.Content;
+            post.Content = request.Content;
             post.UpdatedAt = DateTime.UtcNow;
 
             service.Update(post);
             service.Save();
 
-            return TypedResults.Ok(request);
+            PostDTO postDTO = mapper.Map<PostDTO>(post);
+
+
+            return TypedResults.Ok(new ResponseDTO<PostDTO> { Message = "Success", Data = postDTO });
         }
     }
 }
