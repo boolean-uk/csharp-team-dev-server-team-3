@@ -20,6 +20,11 @@ namespace exercise.wwwapi.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
+
+            modelBuilder.Entity<UserCohort>()
+                .HasKey(uc => new { uc.UserId, uc.CohortId });
+
+
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)
                 .HasConversion<string>();
@@ -49,5 +54,7 @@ namespace exercise.wwwapi.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostComment> PostComments { get; set; }
+        public DbSet<Cohort> Cohorts { get; set; }
+        public DbSet<UserCohort> UserCohorts { get; set; }
     }
 }
