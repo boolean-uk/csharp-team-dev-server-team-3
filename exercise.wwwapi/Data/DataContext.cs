@@ -37,14 +37,17 @@ namespace exercise.wwwapi.Data
             //    .WithMany(c => c.TeacherCohorts)
             //    .HasForeignKey(tc => tc.CohortId);
 
-            // Seed Cohorts
-
             // seed users
             PersonData personData = new PersonData();
+            PostData postData = new PostData(personData.Users);
+            PostCommentData postCommentData = new PostCommentData(postData.Posts, personData.Users);
             modelBuilder.Entity<User>().HasData(personData.Users);
+            modelBuilder.Entity<Post>().HasData(postData.Posts);
+            modelBuilder.Entity<PostComment>().HasData(postCommentData.Comments);
 
-            // Seed UserCohorts
         }
         public DbSet<User> Users { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostComment> PostComments { get; set; }
     }
 }
