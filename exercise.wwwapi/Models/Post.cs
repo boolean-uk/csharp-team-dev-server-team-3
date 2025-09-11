@@ -7,7 +7,7 @@ namespace exercise.wwwapi.Models
     public class Post
     {
         [Key, Column("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
         [Column("userid")]
         public required int UserId { get; set; }
         [ForeignKey("UserId")]

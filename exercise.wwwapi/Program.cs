@@ -22,6 +22,8 @@ var config = new ConfigurationSettings();
 // Add services to the container.
 builder.Services.AddScoped<IConfigurationSettings, ConfigurationSettings>();
 builder.Services.AddScoped<IRepository<User>, Repository<User>>();
+builder.Services.AddScoped<IRepository<Post>, Repository<Post>>();
+builder.Services.AddScoped<IRepository<PostComment>, Repository<PostComment>>();
 builder.Services.AddScoped<ILogger, Logger<string>>();
 builder.Services.AddAutoMapper(typeof(Program));
 
