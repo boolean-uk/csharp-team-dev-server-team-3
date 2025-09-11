@@ -33,14 +33,21 @@ namespace exercise.wwwapi.EndPoints
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        private static async Task<IResult> GetUsers(IRepository<User> service, string? firstName, ClaimsPrincipal user)
+        private static async Task<IResult> GetUsers(IRepository<User> service, string? name, ClaimsPrincipal user)
         {
             IEnumerable<User> results = await service.Get();
-            UsersSuccessDTO userData = new UsersSuccessDTO() { 
-                Users = !string.IsNullOrEmpty(firstName) 
-                    ? results.Where(i => i.Email.Contains(firstName)).ToList() 
-                    : results.ToList() };
-            ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>() 
+            string? search = name?.Trim().ToLower();
+            UsersSuccessDTO userData = new UsersSuccessDTO()
+            {
+                Users = !string.IsNullOrWhiteSpace(name)
+                    ? results.Where(i =>
+                        (i.FirstName.ToLower().Contains(search)) ||
+                        (i.LastName.ToLower().Contains(search)) ||
+                        ($"{i.FirstName ?? ""} {i.LastName ?? ""}".ToLower().Contains(search))
+                    ).ToList()
+                    : results.ToList()
+            };
+            ResponseDTO <UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>() 
                 {
                     Message = "success", 
                     Data = userData 
