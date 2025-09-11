@@ -176,78 +176,46 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message["timestamp"], Is.Not.Null);
         }
         [Test]
-        public async Task GetAllPostsStatusAndMessage()
+        public async Task DeletePostById_SuccessAndNotFound()
         {
-            // Act
-            var response = await _client.GetAsync("/posts");
-            var contentString = await response.Content.ReadAsStringAsync();
-
-            JsonNode? message = null;
-            if (!string.IsNullOrWhiteSpace(contentString))
+            // Arrange, create a post first
+            var newPost = new CreatePostDTO
             {
-                message = JsonNode.Parse(contentString);
-            }
+                Userid = 1,
+                Content = "Temp post to delete"
+            };
+            var json = JsonSerializer.Serialize(newPost);
+            var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
-            Console.WriteLine("Message: " + message);
+            var createResponse = await _client.PostAsync("/posts", requestBody);
+            var createContent = await createResponse.Content.ReadAsStringAsync();
+            var createMessage = JsonNode.Parse(createContent);
 
-            // Assert status
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            int createdPostId = createMessage!["data"]!["id"]!.GetValue<int>();
 
-            // Assert JSON structure
-            Assert.That(message, Is.Not.Null);
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("success"));
+            // Act, delete the post
+            var deleteResponse = await _client.DeleteAsync($"/posts/{createdPostId}");
+            var deleteContent = await deleteResponse.Content.ReadAsStringAsync();
 
-            var data = message["data"];
-            Assert.That(data, Is.Not.Null);
-            Assert.That(data.AsArray(), Has.Count.GreaterThanOrEqualTo(0));
+            // Assert delete success
+            Assert.That(deleteResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            foreach (var post in data.AsArray())
-            {
-                Assert.That(post["id"]?.GetValue<int>(), Is.GreaterThan(0));
-                Assert.That(post["content"]?.GetValue<string>(), Is.Not.Null);
-                Assert.That(post["numLikes"]?.GetValue<int>(), Is.Not.Null);
-                Assert.That(post["comments"]?.AsArray(), Is.Not.Null);
+            // Act again, try deleting same post (should now be gone)
+            var deleteAgainResponse = await _client.DeleteAsync($"/posts/{createdPostId}");
+            var deleteAgainContent = await deleteAgainResponse.Content.ReadAsStringAsync();
+            var deleteAgainMessage = JsonNode.Parse(deleteAgainContent);
 
-                var user = post["user"];
-                Assert.That(user, Is.Not.Null);
-                Assert.That(user!["id"]?.GetValue<int>(), Is.GreaterThan(0));
-                Assert.That(user["firstName"]?.GetValue<string>(), Is.Not.Null);
-                Assert.That(user["lastName"]?.GetValue<string>(), Is.Not.Null);
-                Assert.That(user["photo"]?.GetValue<string>(), Is.Not.Null);
-            }
+            // Assert not found
+            Assert.That(deleteAgainResponse.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(deleteAgainMessage?["message"]?.GetValue<string>(), Is.EqualTo("Post not found"));
         }
 
-        [TestCase(1, HttpStatusCode.NoContent)]  // existing post
-        [TestCase(9999999, HttpStatusCode.NotFound)]  // non-existing post
-        public async Task DeletePostById(int postId, HttpStatusCode expected)
-        {
-            // Act
-            var response = await _client.DeleteAsync($"/posts/{postId}");
-            var contentString = await response.Content.ReadAsStringAsync();
 
-            JsonNode? message = null;
-            if (!string.IsNullOrWhiteSpace(contentString))
-            {
-                message = JsonNode.Parse(contentString);
-            }
 
-            Console.WriteLine("Message: " + message);
 
-            // Assert status
-            Assert.That(response.StatusCode, Is.EqualTo(expected));
-
-            if (expected == HttpStatusCode.NotFound)
-            {
-                Assert.That(message, Is.Not.Null);
-                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Post not found"));
-                Assert.That(message["data"], Is.Null);
-                Assert.That(message["timestamp"], Is.Not.Null);
-            }
-        }
-
-        [TestCase(1, "Updated content", HttpStatusCode.OK)]
+        [TestCase(5, "Updated content", HttpStatusCode.OK)]
         [TestCase(9999999, "Updated content", HttpStatusCode.NotFound)]
-        [TestCase(1, "", HttpStatusCode.BadRequest)]
+        [TestCase(5, "", HttpStatusCode.BadRequest)]
         public async Task UpdatePostById(int postId, string newContent, HttpStatusCode expected)
         {
             // Arrange

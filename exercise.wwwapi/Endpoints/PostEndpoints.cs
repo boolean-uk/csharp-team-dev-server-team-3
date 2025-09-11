@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using exercise.wwwapi.Data;
 using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Posts;
@@ -17,8 +18,9 @@ namespace exercise.wwwapi.Endpoints
             posts.MapPost("/", CreatePost).WithSummary("Create post");
             posts.MapGet("/", GetAllPosts).WithSummary("Get all posts");
             posts.MapPatch("/{id}", UpdatePost).WithSummary("Update a certain post");
-            posts.MapDelete("/{id}", GetAllPosts).WithSummary("Remove a certain post");
+            posts.MapDelete("/{id}", DeletePost).WithSummary("Remove a certain post");
         }
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -72,8 +74,7 @@ namespace exercise.wwwapi.Endpoints
                     Message = "Content cannot be empty"
                 });
             
-            // TODO: Add new getbyid that uses includes
-            var post = service.GetById(id);
+            Post? post = service.GetById(id, q=>q.Include(p => p.User));
 
             if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
 
@@ -87,6 +88,19 @@ namespace exercise.wwwapi.Endpoints
 
 
             return TypedResults.Ok(new ResponseDTO<PostDTO> { Message = "Success", Data = postDTO });
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        private static IResult DeletePost(IRepository<Post> service, int id)
+        {
+            Post? post = service.GetById(id, q => q.Include(p => p.User));
+            if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
+
+            service.Delete(id);
+            service.Save();
+
+            return TypedResults.Ok(new ResponseDTO<PostDTO> { Message = "Success" });
         }
     }
 }

@@ -50,6 +50,13 @@ namespace exercise.wwwapi.Repository
             return _table.Find(id);
         }
 
+        public T? GetById(int id, Func<IQueryable<T>, IQueryable<T>> includeQuery)
+        {
+            IQueryable<T> query = _table.Where(e => EF.Property<int>(e, "Id") == id);
+            query = includeQuery(query);
+            return query.FirstOrDefault();
+        }
+
         public void Insert(T obj)
         {
             _table.Add(obj);
