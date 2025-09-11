@@ -83,7 +83,7 @@ namespace exercise.wwwapi.EndPoints
                 Data = mapper.Map<UserDTO>(user)
             };
 
-            return Results.Created($"/users/{response.Data.id}", response.Data);
+            return Results.Created($"/users/{user.Id}", response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -132,11 +132,18 @@ namespace exercise.wwwapi.EndPoints
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> GetUserById(IRepository<User> service, int id)
+        public static async Task<IResult> GetUserById(IRepository<User> service, int id, IMapper mapper)
         {
             var user = service.GetById(id);
             if (user == null) return TypedResults.NotFound();
-            return TypedResults.Ok(user);
+
+            ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
+            {
+                Message = "success",
+                Data = mapper.Map<UserDTO>(user)
+            };
+
+            return TypedResults.Ok(response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
