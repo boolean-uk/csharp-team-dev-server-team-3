@@ -34,6 +34,55 @@ namespace exercise.tests.IntegrationTests
         }
 
         [Test]
+        public async Task GetAllPosts()
+        {
+            // Act: get all posts
+            var response = await _client.GetAsync("/posts");
+            var contentString = await response.Content.ReadAsStringAsync();
+            var message = string.IsNullOrWhiteSpace(contentString) ? null : JsonNode.Parse(contentString);
+
+            // Assert status
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            // Assert JSON structure
+            Assert.That(message, Is.Not.Null);
+            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("success"));
+
+            var data = message?["data"]?.AsArray();
+            Assert.That(data, Is.Not.Null);
+            Assert.That(data!.Count, Is.GreaterThan(0));
+
+
+            Console.WriteLine("Message: " + message);
+
+            // Check first post for structure
+            var post = data!.First();
+            Assert.That(post["id"]?.GetValue<int>(), Is.GreaterThan(0));
+            Assert.That(post["content"]?.GetValue<string>(), Is.Not.Null);
+            Assert.That(post["numLikes"]?.GetValue<int>(), Is.Not.Null);
+            Assert.That(post["createdAt"], Is.Not.Null);
+
+            // Check nested user
+            var user = post["user"];
+            Assert.That(user, Is.Not.Null);
+            Assert.That(user!["id"]?.GetValue<int>(), Is.GreaterThan(0));
+            Assert.That(user["firstName"]?.GetValue<string>(), Is.Not.Null);
+            Assert.That(user["lastName"]?.GetValue<string>(), Is.Not.Null);
+            Assert.That(user["photo"], Is.Not.Null);
+
+            // Check nested comments
+            var comments = post["comments"]?.AsArray();
+            Assert.That(comments, Is.Not.Null);
+            // Check comments
+            if (comments!.Count > 0)
+            {
+                var comment = comments!.First();
+                Assert.That(comment["content"]?.GetValue<string>(), Is.Not.Null);
+                Assert.That(comment["id"]?.GetValue<int>(), Is.GreaterThan(0));
+            }
+        }
+
+        [Test]
         public async Task SuccessfulCreatePostStatus()
         {
             int userid = 1;

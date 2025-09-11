@@ -56,7 +56,7 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static IResult GetAllPosts(IRepository<Post> service, IMapper mapper)
         {
-            IEnumerable<Post> results = service.GetWithIncludes(q => q.Include(p => p.User));
+            IEnumerable<Post> results = service.GetWithIncludes(q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
             IEnumerable<PostDTO> postDTOs = mapper.Map<IEnumerable<PostDTO>>(results);
             ResponseDTO<IEnumerable<PostDTO>> response = new ResponseDTO<IEnumerable<PostDTO>>()
             {
@@ -94,7 +94,7 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult DeletePost(IRepository<Post> service, int id)
         {
-            Post? post = service.GetById(id, q => q.Include(p => p.User));
+            Post? post = service.GetById(id, q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
             if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
 
             service.Delete(id);

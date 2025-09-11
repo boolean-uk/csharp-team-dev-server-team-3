@@ -17,6 +17,9 @@ namespace workshop.wwwapi.Tools
             CreateMap<User, UserBasicDTO>();
             CreateMap<Post, PostDTO>();
 
+            CreateMap<PostComment, PostCommentDTO>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
+
         }
     }
 }
