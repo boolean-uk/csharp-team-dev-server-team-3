@@ -7,7 +7,7 @@ namespace exercise.wwwapi.Models
     public class Cohort
     {
         [Key, Column("id")]
-        public required int Id { get; set; }
+        public int Id { get; set; }
         [Column("title")]
         public string Title { get; set; } = string.Empty;
     }
