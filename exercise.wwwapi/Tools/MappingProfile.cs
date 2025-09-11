@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using exercise.wwwapi.DTOs;
+using exercise.wwwapi.DTOs.GetUsers;
+using exercise.wwwapi.DTOs.Posts;
 using exercise.wwwapi.DTOs.Register;
 using exercise.wwwapi.Models;
 using System;
@@ -12,6 +14,8 @@ namespace workshop.wwwapi.Tools
         public MappingProfile()
         {
             CreateMap<User, UserDTO>();
+            CreateMap<User, UserBasicDTO>();
+            CreateMap<Post, PostDTO>();
 
         }
     }

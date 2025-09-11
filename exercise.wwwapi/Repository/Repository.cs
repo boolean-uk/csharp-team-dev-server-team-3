@@ -39,9 +39,22 @@ namespace exercise.wwwapi.Repository
         {
             return _table.Where(filter).ToList();
         }
+
+        public IEnumerable<T> GetWithIncludes(Func<IQueryable<T>, IQueryable<T>> includeQuery)
+        {
+            IQueryable<T> query = includeQuery(_table);
+            return query.ToList();
+        }
         public T GetById(object id)
         {
             return _table.Find(id);
+        }
+
+        public T? GetById(int id, Func<IQueryable<T>, IQueryable<T>> includeQuery)
+        {
+            IQueryable<T> query = _table.Where(e => EF.Property<int>(e, "Id") == id);
+            query = includeQuery(query);
+            return query.FirstOrDefault();
         }
 
         public void Insert(T obj)
