@@ -29,6 +29,19 @@ namespace exercise.wwwapi.Data
                 .Property(u => u.Role)
                 .HasConversion<string>();
 
+
+            //modelBuilder.Entity<User>()
+            //    .HasMany(u => u.Post)
+            //    .WithOne(p => p.User)
+            //    .HasForeignKey(p => p.UserId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Post>()
+                .HasMany(p => p.Comments)
+                .WithOne(c => c.Post)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             //modelBuilder.Entity<UserCohort>()
             //    .HasKey(tc => new { tc.UserId, tc.CohortId });
 
