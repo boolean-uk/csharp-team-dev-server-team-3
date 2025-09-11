@@ -70,7 +70,7 @@ namespace exercise.wwwapi.Data
         public PostCommentData(List<Post> posts, List<User> users)
         {
             int commentId = 1;
-            var random = new Random();
+            var random = new Random(1);
             DateTime somedate = new DateTime(2020, 12, 05, 0, 0, 0, DateTimeKind.Utc);
             foreach (var post in posts)
             {
@@ -78,11 +78,12 @@ namespace exercise.wwwapi.Data
 
                 for (int i = 0; i < numComments; i++)
                 {
-                    var start = _commentStarts[random.Next(_commentStarts.Count)];
-                    var middle = _commentMiddles[random.Next(_commentMiddles.Count)];
-                    var end = _commentEnds[random.Next(_commentEnds.Count)];
-
+                    string start = _commentStarts[random.Next(_commentStarts.Count)];
+                    string middle = _commentMiddles[random.Next(_commentMiddles.Count)];
+                    string end = _commentEnds[random.Next(_commentEnds.Count)];
+                    string content = $"{start}, {middle} {end}";
                     int commenterId;
+
                     do
                     {
                         commenterId = users[random.Next(users.Count())].Id;
@@ -93,7 +94,7 @@ namespace exercise.wwwapi.Data
                         Id = commentId++,
                         PostId = post.Id,
                         UserId = commenterId,
-                        Content = $"{start}, {middle} {end}",
+                        Content = content,
                         CreatedAt = post.CreatedAt.AddMinutes(random.Next(5, 240)),
                         UpdatedAt = null
                     });

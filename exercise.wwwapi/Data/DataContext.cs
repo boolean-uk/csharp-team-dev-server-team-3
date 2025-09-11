@@ -40,12 +40,11 @@ namespace exercise.wwwapi.Data
             // seed users
             PersonData personData = new PersonData();
             PostData postData = new PostData(personData.Users);
-            //PostCommentData postCommentData = new PostCommentData(postData.Posts, personData.Users);
+            PostCommentData postCommentData = new PostCommentData(postData.Posts, personData.Users);
             modelBuilder.Entity<User>().HasData(personData.Users);
             modelBuilder.Entity<Post>().HasData(postData.Posts);
-            //modelBuilder.Entity<PostComment>().HasData(postCommentData.Comments);
+            modelBuilder.Entity<PostComment>().HasData(postCommentData.Comments);
 
-            // Seed UserCohorts
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
