@@ -206,7 +206,12 @@ namespace exercise.wwwapi.EndPoints
             repository.Update(user);
             repository.Save();
 
-            return TypedResults.Ok(userPatch);
+            ResponseDTO<UserPatchDTO> responseDTO = new ResponseDTO<UserPatchDTO> { 
+                Message = "success", 
+                Data = userPatch
+            };
+
+            return TypedResults.Ok(responseDTO);
         }
         private static string CreateToken(User user, IConfigurationSettings config)
         {
