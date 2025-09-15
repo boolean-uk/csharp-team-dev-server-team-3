@@ -142,7 +142,7 @@ namespace exercise.wwwapi.EndPoints
         public static async Task<IResult> GetUserById(IRepository<User> service, int id, IMapper mapper)
         {
             var user = service.GetById(id);
-            if (user == null) return TypedResults.NotFound();
+            if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
 
             ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
             {
@@ -163,7 +163,7 @@ namespace exercise.wwwapi.EndPoints
 
             var user = repository.GetById(id);
 
-            if (user == null) return TypedResults.NotFound();
+            if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
 
             if (userPatch.Username != null && userPatch.Username != user.Username)
             {
