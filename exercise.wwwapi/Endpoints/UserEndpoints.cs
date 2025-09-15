@@ -64,14 +64,14 @@ namespace exercise.wwwapi.EndPoints
             // syntax checks
             // check valid password
             string validationResult = Validator.Password(request.password);
-            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = validationResult });
+            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = validationResult });
             // check valid email
             string emailValidation = Validator.Email(request.email);
-            if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = emailValidation });
+            if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = emailValidation });
 
             // check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<Object>() { Message = "Fail" });
+            if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<string>() { Message = "Fail" });
             
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
@@ -108,7 +108,7 @@ namespace exercise.wwwapi.EndPoints
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided"});
+            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided"});
 
 
 
@@ -118,7 +118,7 @@ namespace exercise.wwwapi.EndPoints
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
                 // should probably be 401 unauthorized
-                return Results.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided" });
+                return Results.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
             }
 
             string token = CreateToken(user, config);
