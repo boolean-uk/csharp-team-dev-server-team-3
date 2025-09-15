@@ -185,7 +185,7 @@ namespace exercise.wwwapi.EndPoints
             }
             if (userPatch.Email != null && userPatch.Email != user.Email)
             {
-                // Validate username
+                // Validate email
                 if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email" });
                 var emailExists = repository.GetAllFiltered(q => q.Email == userPatch.Email);
                 if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Email is already in use" });
