@@ -95,6 +95,7 @@ namespace exercise.wwwapi.EndPoints
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         private static IResult Login(LoginRequestDTO request, IRepository<User> service, IConfigurationSettings config, IMapper mapper)
         {
             //if (string.IsNullOrEmpty(request.username)) request.username = request.email;
@@ -117,8 +118,11 @@ namespace exercise.wwwapi.EndPoints
             
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
-                // should probably be 401 unauthorized
-                return Results.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
+                // TypedResults.Unauthorized did not support Message. "Custom" solution which includes message. 
+                return Results.Json(new ResponseDTO<string>
+                {
+                    Message = "Invalid email and/or password provided"
+                }, statusCode: StatusCodes.Status401Unauthorized);
             }
 
             string token = CreateToken(user, config);
