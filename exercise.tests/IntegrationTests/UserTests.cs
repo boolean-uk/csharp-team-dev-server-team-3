@@ -184,7 +184,7 @@ namespace exercise.tests.IntegrationTests
         }
 
         [Test]
-        public async Task UpdateUserNoContent()
+        public async Task UpdateUserNullFieldsOnly()
         {
             var fieldsToUpdate = new Dictionary<string, object?>{};
 
@@ -194,7 +194,7 @@ namespace exercise.tests.IntegrationTests
             int userId = 1;
             var response = await _client.PatchAsync($"/users/{userId}", content);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
         [Test]

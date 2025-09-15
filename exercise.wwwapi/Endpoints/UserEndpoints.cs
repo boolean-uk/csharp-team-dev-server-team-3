@@ -154,12 +154,12 @@ namespace exercise.wwwapi.EndPoints
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch)
+        public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch, IMapper mapper)
         {
-            if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) return TypedResults.NoContent();
+            if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) 
+                return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Provide at least one field for update" });
 
             var user = repository.GetById(id);
 
@@ -168,34 +168,34 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.Username != null && userPatch.Username != user.Username)
             {
                 // Validate username
-                if (Validator.Username(userPatch.Username) != "Accepted") return TypedResults.BadRequest("Invalid username");
+                if (Validator.Username(userPatch.Username) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid username" });
                 var usernameExists = repository.GetAllFiltered(q => q.Username == userPatch.Username);
-                if (usernameExists.Count() != 0) return TypedResults.BadRequest("Username is already in use");
+                if (usernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Username is already in use" });
                 // Update
                 user.Username = userPatch.Username;
             }
             if (userPatch.GithubUsername != null && userPatch.GithubUsername != user.GithubUsername)
             {
                 // Validate github username
-                if (Validator.Username(userPatch.GithubUsername) != "Accepted") return TypedResults.BadRequest("Invalid GitHub username");
+                if (Validator.Username(userPatch.GithubUsername) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid GitHub username" });
                 var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUsername == userPatch.GithubUsername);
-                if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest("GitHub username is already in use");
+                if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "GitHub username is already in use" });
                 // Update
                 user.GithubUsername = userPatch.GithubUsername;
             }
             if (userPatch.Email != null && userPatch.Email != user.Email)
             {
                 // Validate username
-                if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest("Invalid email");
+                if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email" });
                 var emailExists = repository.GetAllFiltered(q => q.Email == userPatch.Email);
-                if (emailExists.Count() != 0) return TypedResults.BadRequest("Email is already in use");
+                if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Email is already in use" });
                 // Update
                 user.Email = userPatch.Email;
             }
             if (userPatch.Password != null)
             {
                 // Validate username
-                if (Validator.Password(userPatch.Password) != "Accepted") return TypedResults.BadRequest("Invalid password");
+                if (Validator.Password(userPatch.Password) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid password" });
                 // Hash
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(userPatch.Username);
                 // Update
@@ -208,7 +208,7 @@ namespace exercise.wwwapi.EndPoints
             {
                 if (userPatch.Role == 0) { user.Role = Roles.student; }
                 else if (userPatch.Role == 1) { user.Role = Roles.teacher; }
-                else {return TypedResults.BadRequest("Role does not exist");}
+                else {return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Role does not exist" });}
             }
             if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
             // TODO: Add cohort support after implementing the Cohort model and adding it to user.
@@ -220,7 +220,13 @@ namespace exercise.wwwapi.EndPoints
             repository.Update(user);
             repository.Save();
 
-            return TypedResults.Ok(userPatch);
+            ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
+            {
+                Message = "success",
+                Data = mapper.Map<UserDTO>(user)
+            };
+
+            return TypedResults.Ok(response);
         }
         private static string CreateToken(User user, IConfigurationSettings config)
         {
