@@ -17,5 +17,6 @@ namespace exercise.wwwapi.DTOs
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Bio { get; set; }
+        public string? Photo { get; set; }
     }
 }
