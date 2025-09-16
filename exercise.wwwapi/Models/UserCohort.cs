@@ -10,8 +10,6 @@ namespace exercise.wwwapi.Models
         public required int CohortId { get; set; }
         [ForeignKey("CohortId")]
         public Cohort? Cohort { get; set; }
-
-
         [Column("userid")]
         public required int UserId { get; set; }
         [ForeignKey("UserId")]

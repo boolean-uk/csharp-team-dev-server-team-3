@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace exercise.wwwapi.Models
 {
@@ -49,7 +50,8 @@ namespace exercise.wwwapi.Models
         [Column("photo")]
         public string Photo {  get; set; } = string.Empty;
 
-        //public ICollection<Cohort> Cohorts { get; set; }
+        [JsonIgnore]
+        public ICollection<UserCohort> UserCohorts { get; set; } = new List<UserCohort>();
 
     }
 }
