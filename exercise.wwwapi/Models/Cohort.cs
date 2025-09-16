@@ -11,11 +11,8 @@ namespace exercise.wwwapi.Models
         public int Id { get; set; }
         [Column("title")]
         public string Title { get; set; } = string.Empty;
-        //[Column("userid")]
-        //public int UserId { get; set; }
-        //[ForeignKey("UserId")]
-        //public User? User { get; set; }
         [JsonIgnore]
         public ICollection<UserCohort> UserCohorts { get; set; } = new List<UserCohort>();
     }
 }
+|
