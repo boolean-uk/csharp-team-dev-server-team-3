@@ -220,6 +220,7 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.StartDate != null) user.StartDate = (DateTime)userPatch.StartDate;
             if (userPatch.EndDate != null) user.EndDate = (DateTime)userPatch.EndDate;
             if (userPatch.Bio != null) user.Bio = userPatch.Bio;
+            if (userPatch.Photo != null) user.Photo = userPatch.Photo;
 
             repository.Update(user);
             repository.Save();
