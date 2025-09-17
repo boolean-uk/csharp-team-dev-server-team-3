@@ -361,7 +361,7 @@ namespace exercise.tests.IntegrationTests
         public async Task GetCommentsForPost_Success()
         {
             // Arrange
-            int postId = 6;
+            int postId = 5;
 
             // Act
             var response = await _client.GetAsync($"/posts/{postId}/comments");
@@ -461,6 +461,102 @@ namespace exercise.tests.IntegrationTests
 
             // Assert: Now it's not found
             Assert.That(deleteAgainResponse.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+        }
+
+
+        [Test]
+        public async Task GetPostsByUser_Success()
+        {
+            // Arrange
+            int userId = 1; // CHeck if this user still has posts if this test fails (manuially)
+
+            // Act
+            var response = await _client.GetAsync($"/posts/user/{userId}");
+            var contentString = await response.Content.ReadAsStringAsync();
+            var message = JsonNode.Parse(contentString);
+            Console.WriteLine(message);
+            // Assert status
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            
+            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+            var data = message?["data"]?.AsArray();
+            Assert.That(data, Is.Not.Null);
+            Assert.That(data!.Count, Is.GreaterThan(0), "Expected user 1 to have at least one post.");
+
+            // Assert that ALL posts in the response belong to the correct user
+            foreach (var post in data!)
+            {
+                Assert.That(post?["user"]?["id"]?.GetValue<int>(), Is.EqualTo(userId));
+            }
+
+            var firstPost = data.First();
+            Assert.That(firstPost?["id"]?.GetValue<int>(), Is.GreaterThan(0));
+            Assert.That(firstPost?["content"]?.GetValue<string>(), Is.Not.Null);
+        }
+
+        [Test]
+        public async Task GetPostsByUser_NotFound()
+        {
+            // Arrange
+            int nonExistentUserId = 99999;
+
+            // Act
+            var response = await _client.GetAsync($"/posts/user/{nonExistentUserId}");
+            var contentString = await response.Content.ReadAsStringAsync();
+            var message = JsonNode.Parse(contentString);
+
+            // Assert
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("No posts found for this user"));
+            Assert.That(message?["data"], Is.Null);
+        }
+
+        [Test]
+        public async Task GetCommentsByUser_Success()
+        {
+            // Arrange
+            int userId = 1; // Check if this user still has comments if this fails
+
+            // Act
+            var response = await _client.GetAsync($"/comments/user/{userId}");
+            var contentString = await response.Content.ReadAsStringAsync();
+            var message = JsonNode.Parse(contentString);
+            Console.WriteLine(message);
+            // Assert status
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+            var data = message?["data"]?.AsArray();
+            Assert.That(data, Is.Not.Null);
+            Assert.That(data!.Count, Is.GreaterThan(0), "Expected user 1 to have at least one comment.");
+
+            // Assert that ALL comments in the response belong to the correct user
+            foreach (var comment in data!)
+            {
+                Assert.That(comment?["user"]?["id"]?.GetValue<int>(), Is.EqualTo(userId));
+            }
+
+            var firstComment = data.First();
+            Assert.That(firstComment?["id"]?.GetValue<int>(), Is.GreaterThan(0));
+            Assert.That(firstComment?["content"]?.GetValue<string>(), Is.Not.Null.Or.Empty);
+        }
+
+        [Test]
+        public async Task GetCommentsByUser_NotFound()
+        {
+            // Arrange
+            int nonExistentUserId = 99999;
+
+            // Act
+            var response = await _client.GetAsync($"/comments/user/{nonExistentUserId}");
+            var contentString = await response.Content.ReadAsStringAsync();
+            var message = JsonNode.Parse(contentString);
+
+            // Assert
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("No comments found for this user"));
+            Assert.That(message?["data"], Is.Null);
         }
 
     }

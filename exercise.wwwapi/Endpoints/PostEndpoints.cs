@@ -21,13 +21,16 @@ namespace exercise.wwwapi.Endpoints
             posts.MapDelete("/{id}", DeletePost).WithSummary("Remove a certain post");
 
             posts.MapPost("/{postId}/comments", AddCommentToPost).WithSummary("Add a new comment to a post");
-            posts.MapGet("/{postId}/comments", GetCommentsForPost).WithSummary("Get comments for a specific post (with pagination)");
+            posts.MapGet("/{postId}/comments", GetCommentsForPost).WithSummary("Get comments for a specific post");
 
             // Standalone comment endpoints for editing/deleting
             var comments = app.MapGroup("comments");
             comments.MapPatch("/{id}", UpdateComment).WithSummary("Edit an existing comment");
             comments.MapDelete("/{id}", DeleteCommentById).WithSummary("Remove an existing comment");
 
+            // Endpoints to get by user
+            posts.MapGet("/user/{userId}", GetPostsByUser).WithSummary("Get posts by a specific user");
+            comments.MapGet("/user/{userId}", GetCommentsByUser).WithSummary("Get comments by a specific user");
         }
 
 
@@ -156,12 +159,13 @@ namespace exercise.wwwapi.Endpoints
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        private static IResult GetCommentsForPost(IRepository<PostComment> service, IMapper mapper, int postId)
+        private static IResult GetCommentsForPost(IRepository<Post> postservice, IMapper mapper, int postId)
         {
-            PostComment? comment = service.GetById(postId, q => q.Include(c => c.User));
-            if (comment == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Comment not found" });
-            PostCommentDTO commentDTO = mapper.Map<PostCommentDTO>(comment);
-            return TypedResults.Ok(new ResponseDTO<PostCommentDTO> { Message = "Success", Data = commentDTO });
+            Post? post = postservice.GetById(postId, q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
+            if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
+            List<PostComment> comments = [.. post.Comments];
+            List<PostCommentDTO> commentsDTO = mapper.Map<List<PostCommentDTO>>(comments);
+            return TypedResults.Ok(new ResponseDTO<List<PostCommentDTO>> { Message = "Success", Data = commentsDTO });
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -204,6 +208,38 @@ namespace exercise.wwwapi.Endpoints
             service.Save();
 
             return TypedResults.Ok(new ResponseDTO<object> { Message = "Comment deleted successfully." });
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        private static IResult GetPostsByUser(IRepository<Post> service, IMapper mapper, int userid)
+        {
+            IEnumerable<Post> results = service.GetWithIncludes(q => q.Where(p => p.UserId == userid).Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
+            if (results.Count() == 0) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "No posts found for this user" });
+
+            IEnumerable<PostDTO> postDTOs = mapper.Map<IEnumerable<PostDTO>>(results);
+            ResponseDTO<IEnumerable<PostDTO>> response = new ResponseDTO<IEnumerable<PostDTO>>()
+            {
+                Message = "Success",
+                Data = postDTOs
+            };
+            return TypedResults.Ok(response);
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        private static IResult GetCommentsByUser(IRepository<PostComment> service, IMapper mapper, int userid)
+        {
+            IEnumerable<PostComment> results = service.GetWithIncludes(q => q.Where(p => p.UserId == userid).Include(p => p.User));
+            if (results.Count() == 0) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "No comments found for this user" });
+
+            IEnumerable<PostCommentDTO> PostCommentDTOs = mapper.Map<IEnumerable<PostCommentDTO>>(results);
+            ResponseDTO<IEnumerable<PostCommentDTO>> response = new ResponseDTO<IEnumerable<PostCommentDTO>>()
+            {
+                Message = "Success",
+                Data = PostCommentDTOs
+            };
+            return TypedResults.Ok(response);
         }
     }
 }
