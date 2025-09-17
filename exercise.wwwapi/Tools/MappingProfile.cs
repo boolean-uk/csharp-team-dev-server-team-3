@@ -17,11 +17,13 @@ namespace workshop.wwwapi.Tools
             CreateMap<User, UserDTO>();
             CreateMap<User, UserBasicDTO>();
             CreateMap<Post, PostDTO>();
-            CreateMap<Cohort, CohortDTO>();
+
+            CreateMap<Cohort, CohortDTO>()
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.UserCohorts.Where(u => u.User.Role == Roles.student)))
+                .ForMember(dest => dest.Teachers, opt => opt.MapFrom(src => src.UserCohorts.Where(u => u.User.Role == Roles.teacher)));
 
             CreateMap<UserCohort, UserCohortDTO>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
-                .ForMember(dest => dest.Cohort, opt => opt.MapFrom(src => src.Cohort.Title));
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
             //CreateMap<UserCohortDTO, UserBasicDTO>();
 
             CreateMap<PostComment, PostCommentDTO>()

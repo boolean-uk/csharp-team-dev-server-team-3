@@ -15,4 +15,3 @@ namespace exercise.wwwapi.Models
         public ICollection<UserCohort> UserCohorts { get; set; } = new List<UserCohort>();
     }
 }
-|

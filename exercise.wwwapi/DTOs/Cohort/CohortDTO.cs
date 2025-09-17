@@ -4,6 +4,8 @@
     {
         public string Title { get; set; }
 
-        public ICollection<UserCohortDTO> UserCohorts { get; set; } = new List<UserCohortDTO>();
+        public ICollection<UserCohortDTO> Students { get; set; } = new List<UserCohortDTO>();
+
+        public ICollection<UserCohortDTO> Teachers { get; set; } = new List<UserCohortDTO>();
     }
 }
