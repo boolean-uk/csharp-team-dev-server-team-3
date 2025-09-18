@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using exercise.wwwapi.Data;
 using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Posts;

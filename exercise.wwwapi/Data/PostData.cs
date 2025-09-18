@@ -1,5 +1,4 @@
 ﻿using exercise.wwwapi.Models;
-using System;
 
 namespace exercise.wwwapi.Data
 {

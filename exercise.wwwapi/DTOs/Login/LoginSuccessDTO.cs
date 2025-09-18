@@ -1,6 +1,4 @@
-﻿using exercise.wwwapi.Models;
-
-namespace exercise.wwwapi.DTOs.Login
+﻿namespace exercise.wwwapi.DTOs.Login
 {
     public class LoginSuccessDTO
     {

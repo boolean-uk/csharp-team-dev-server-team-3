@@ -3,7 +3,6 @@ using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Win32;
 using System.Security.Claims;
 
 namespace exercise.wwwapi.EndPoints

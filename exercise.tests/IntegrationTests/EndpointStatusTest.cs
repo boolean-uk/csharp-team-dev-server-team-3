@@ -1,7 +1,4 @@
-﻿using exercise.wwwapi.DTOs.Login;
-using exercise.wwwapi.DTOs.Register;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Text;
 using System.Text.Json;

@@ -1,11 +1,7 @@
 ﻿using exercise.tests.Helpers;
 using exercise.wwwapi.DTOs.Validation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Net;
-using System.Net.Http.Json;
-using System.Numerics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;

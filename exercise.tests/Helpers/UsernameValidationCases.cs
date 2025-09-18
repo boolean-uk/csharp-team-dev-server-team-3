@@ -1,7 +1,4 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 
 namespace exercise.tests.Helpers
 {

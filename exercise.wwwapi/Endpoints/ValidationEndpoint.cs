@@ -1,13 +1,9 @@
 ﻿
 using exercise.wwwapi.DTOs;
-using exercise.wwwapi.DTOs.Register;
 using exercise.wwwapi.DTOs.Validation;
-using exercise.wwwapi.Helpers;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens.Experimental;
-using System.ComponentModel.DataAnnotations;
 
 namespace exercise.wwwapi.Endpoints
 {

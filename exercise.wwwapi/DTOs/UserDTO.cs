@@ -1,5 +1,4 @@
 ﻿using exercise.wwwapi.Models;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace exercise.wwwapi.DTOs
 {

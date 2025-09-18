@@ -1,6 +1,4 @@
 ﻿using exercise.wwwapi.Models;
-using Microsoft.AspNetCore.SignalR;
-using static System.Net.WebRequestMethods;
 
 namespace exercise.wwwapi.Data
 {
