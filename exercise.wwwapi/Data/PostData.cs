@@ -61,12 +61,12 @@ namespace exercise.wwwapi.Data
         public PostData(List<User> users)
         {
             Random random = new Random(1);
-            
+
             for (int i = 1; i < 25; i++)
             {
-                string subject = _subject[random.Next(9-1)];
-                string obj = _objects[random.Next(16-1)];
-                string ending = _endings[random.Next(12-1)];
+                string subject = _subject[random.Next(9 - 1)];
+                string obj = _objects[random.Next(16 - 1)];
+                string ending = _endings[random.Next(12 - 1)];
                 string content = subject + " " + obj + " " + ending;
                 int likes = random.Next(0, 100);
                 int userid = random.Next(0, 100);

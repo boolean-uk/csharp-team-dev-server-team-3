@@ -34,14 +34,15 @@ namespace exercise.tests.IntegrationTests
         }
 
         // ad test cases for approved usernames, emails
-        [Test, TestCaseSource(typeof(UserTestCases), nameof(UserTestCases.ValidRegisterCases))] 
+        [Test, TestCaseSource(typeof(UserTestCases), nameof(UserTestCases.ValidRegisterCases))]
         public async Task Register_success(string username, string email, string password)
         {
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
 
             string uniqueUsername = username.Length > 0 ? username + uniqueId : "";
 
-            RegisterRequestDTO body = new RegisterRequestDTO {
+            RegisterRequestDTO body = new RegisterRequestDTO
+            {
                 email = $"{uniqueId}{email}",
                 password = password
             };
@@ -77,7 +78,7 @@ namespace exercise.tests.IntegrationTests
                 email = $"{uniqueId}{email}",
                 password = password
             };
-            
+
             var json = JsonSerializer.Serialize(body);
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -186,7 +187,7 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserNullFieldsOnly()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>{};
+            var fieldsToUpdate = new Dictionary<string, object?> { };
 
             var json = JsonSerializer.Serialize(fieldsToUpdate);
             var content = new StringContent(json, Encoding.UTF8, "application/json");

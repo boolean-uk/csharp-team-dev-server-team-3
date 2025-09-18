@@ -29,12 +29,12 @@ namespace exercise.wwwapi.Endpoints
 
             User? user = userservice.GetById(request.Userid);
             if (user == null)
-                return Results.NotFound(new ResponseDTO<Object>{Message = "Invalid userID"});
+                return Results.NotFound(new ResponseDTO<Object> { Message = "Invalid userID" });
 
             if (string.IsNullOrWhiteSpace(request.Content))
                 return Results.BadRequest(new ResponseDTO<Object> { Message = "Content cannot be empty" });
 
-            Post post = new Post() { CreatedAt = DateTime.UtcNow, NumLikes = 0, UserId=request.Userid, Content=request.Content };
+            Post post = new Post() { CreatedAt = DateTime.UtcNow, NumLikes = 0, UserId = request.Userid, Content = request.Content };
 
             // is a try catch needed here?
             postservice.Insert(post);
@@ -70,11 +70,12 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, int id, UpdatePostDTO request)
         {
-            if (string.IsNullOrWhiteSpace(request.Content)) return TypedResults.BadRequest(new ResponseDTO<object>{
-                    Message = "Content cannot be empty"
-                });
-            
-            Post? post = service.GetById(id, q=>q.Include(p => p.User));
+            if (string.IsNullOrWhiteSpace(request.Content)) return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = "Content cannot be empty"
+            });
+
+            Post? post = service.GetById(id, q => q.Include(p => p.User));
 
             if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
 

@@ -7,7 +7,7 @@ namespace exercise.wwwapi.Models
     [Table("users")]
     public class User
     {
-        [Key,Column("id")]
+        [Key, Column("id")]
         public int Id { get; set; }
 
         [Column("username")]
@@ -47,7 +47,7 @@ namespace exercise.wwwapi.Models
         public DateTime EndDate { get; set; }
 
         [Column("photo")]
-        public string Photo {  get; set; } = string.Empty;
+        public string Photo { get; set; } = string.Empty;
 
         //public ICollection<Cohort> Cohorts { get; set; }
 

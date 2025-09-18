@@ -27,8 +27,9 @@ builder.Services.AddScoped<IRepository<PostComment>, Repository<PostComment>>();
 builder.Services.AddScoped<ILogger, Logger<string>>();
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddDbContext<DataContext>(options => {
-    
+builder.Services.AddDbContext<DataContext>(options =>
+{
+
     //options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
     options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
     options.LogTo(message => Debug.WriteLine(message));

@@ -30,11 +30,12 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
-        [Test] 
+        [Test]
         public async Task PostCheckInvalidEndpoint()
         {
-            var body = new { 
-                email= $"myemailVery@gmail.com",
+            var body = new
+            {
+                email = $"myemailVery@gmail.com",
                 password = "someR21!password"
             };
             var json = JsonSerializer.Serialize(body);

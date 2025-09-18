@@ -68,7 +68,7 @@ namespace exercise.wwwapi.Endpoints
             if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Email already exists" });
             return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
-  
+
         /// <summary>
         /// Validates a password using custom password rules.
         /// </summary>

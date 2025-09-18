@@ -13,7 +13,7 @@ namespace exercise.wwwapi.EndPoints
         public static void ConfigureSecureApi(this WebApplication app)
         {
             app.MapGet("message", GetMessage);
-           
+
 
         }
         [Authorize]
@@ -21,8 +21,8 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         private static async Task<IResult> GetMessage(IRepository<User> service, ClaimsPrincipal user)
         {
-      
-            return TypedResults.Ok(new { LoggedIn = true, UserId=user.UserRealId().ToString(), Email = $"{user.Email()}", Message = "Pulled the userid and email out of the claims" });
+
+            return TypedResults.Ok(new { LoggedIn = true, UserId = user.UserRealId().ToString(), Email = $"{user.Email()}", Message = "Pulled the userid and email out of the claims" });
         }
     }
 }

@@ -8,7 +8,7 @@ namespace exercise.tests.Helpers
     public static class UsernameValidationTestData
     {
         public static IEnumerable<TestCaseData> UsernameValidationMessageCases()
-        { 
+        {
             string[] endpoints = new string[]
             {
                 "username",
@@ -103,6 +103,6 @@ namespace exercise.tests.Helpers
                 }
             }
         }
-    
+
     }
 }

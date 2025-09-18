@@ -13,7 +13,7 @@ namespace exercise.wwwapi.Data
             "Charles", "Kate", "Oyvind Timian", "Rafael",
             "Oyvind", "Timian", "James", "Roger",
             "Roman", "Hans Jakob", "Hans", "Jakob",
-            "Vegard", "Jonna", "Jonathan", "Reduan", 
+            "Vegard", "Jonna", "Jonathan", "Reduan",
             "Chris", "Nigel", "Christian", "Kristoffer",
             "Johnny", "Will",  "Jim", "Taylor",
             "Nicolas", "Nick", "Brad", "Justin",
@@ -45,7 +45,7 @@ namespace exercise.wwwapi.Data
             "Dubois", "Durand", "Moreau", "Robert",
             "Muller", "Schmidt", "Hoffmann", "Thorlacius", "Walsh", "Kelly",
             "OSullivan", "Murphy","Rossi", "Russo",
-            "Ferrari", "Esposito","Morina", "Braun", 
+            "Ferrari", "Esposito","Morina", "Braun",
             "Faber","Borg","Rusu","De Jong", "De Vries",
             "Bakker","Stojanovski", "Nowak","Silva","Popa",
             "Golob", "Garcia", "Gonzalez", "Andersson","Bianchi",
@@ -56,7 +56,7 @@ namespace exercise.wwwapi.Data
         };
         private List<string> _specialisms = new List<string> { "Software Developer", "Data Scientist", "DevOps Engineer", "Frontend Developer" };
         private List<User> _users = new List<User>();
-        private List<string> _photoUrls = new List<string> ();
+        private List<string> _photoUrls = new List<string>();
         private string baseUrl = "https://mockmind-api.uifaces.co/content/";
         private Dictionary<string, int> urls = new Dictionary<string, int> {
             { "human", 223 },
@@ -94,7 +94,7 @@ namespace exercise.wwwapi.Data
                 string FirstName = _firstnames[userRandom.Next(_firstnames.Count)];
                 string LastName = _lastnames[userRandom.Next(_lastnames.Count)];
                 string username = $"{FirstName.ToLower().Replace(" ", "")}-{LastName.ToLower().Replace(" ", "")}{x}";
-                string email = $"{username.Replace("-",".")}@example.com".Replace(" ", "");
+                string email = $"{username.Replace("-", ".")}@example.com".Replace(" ", "");
                 string githubUsername = username;
                 int phonenum = userRandom.Next(10) % 2 == 0 ? userRandom.Next(40000000, 49999999) : userRandom.Next(40000000, 49999999);
                 string mobile = $"+47{phonenum}";
