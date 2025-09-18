@@ -5,8 +5,10 @@ using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Posts;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace exercise.wwwapi.Endpoints
 {
@@ -79,9 +81,10 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(response);
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, int id, UpdatePostDTO request)
+        public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, ClaimsPrincipal user, int id, UpdatePostDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Content)) return TypedResults.BadRequest(new ResponseDTO<object>{
                     Message = "Content cannot be empty"
@@ -89,7 +92,23 @@ namespace exercise.wwwapi.Endpoints
             
             Post? post = service.GetById(id, q=>q.Include(p => p.User));
 
+            
+
             if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
+
+            var currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (post.UserId.ToString() != currentUserId)
+            {
+                // Create your custom response object
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to edit this post."
+                };
+
+                // Return it as JSON with a 403 Forbidden status code
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
+
 
             post.Content = request.Content;
             post.UpdatedAt = DateTime.UtcNow;
