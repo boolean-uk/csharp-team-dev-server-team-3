@@ -101,7 +101,9 @@ namespace exercise.wwwapi.EndPoints
 
             // Check for valid password
             string validationResult = Validator.Password(request.password);
+            Console.WriteLine($"Password: {validationResult}");
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
+            
 
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
@@ -115,11 +117,8 @@ namespace exercise.wwwapi.EndPoints
 
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
-                // TypedResults.Unauthorized did not support Message. "Custom" solution which includes message. 
-                return Results.Json(new ResponseDTO<string>
-                {
-                    Message = "Invalid email and/or password provided"
-                }, statusCode: StatusCodes.Status401Unauthorized);
+                // should probably be 401 unauthorized
+                return Results.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided" });
             }
 
             string token = CreateToken(user, config);
@@ -235,8 +234,10 @@ namespace exercise.wwwapi.EndPoints
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Sid, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, ((int)user.Role).ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetValue("AppSettings:Token")));

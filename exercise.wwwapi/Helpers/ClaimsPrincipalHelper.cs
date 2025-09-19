@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using exercise.wwwapi.Models;
+using System.Security.Claims;
 
 namespace exercise.wwwapi.Helpers
 {
@@ -9,9 +10,14 @@ namespace exercise.wwwapi.Helpers
         public static int? UserRealId(this ClaimsPrincipal user)
         {
             Claim? claim = user.FindFirst(ClaimTypes.Sid);
-            return int.Parse(claim?.Value);
-            string name = user.Identity?.Name;
 
+            // If the claim is null or its value is not a valid integer, return null.
+            if (claim == null || !int.TryParse(claim.Value, out int userId))
+            {
+                return null;
+            }
+
+            return userId;
         }
         public static string UserId(this ClaimsPrincipal user)
         {
@@ -25,11 +31,14 @@ namespace exercise.wwwapi.Helpers
             Claim? claim = user.FindFirst(ClaimTypes.Email);
             return claim?.Value;
         }
-        public static string? Role(this ClaimsPrincipal user)
+        public static int? Role(this ClaimsPrincipal user)
         {
             Claim? claim = user.FindFirst(ClaimTypes.Role);
-            return claim?.Value;
-        }
 
+            // Check if a claim was found and if its value can be parsed to a role
+            if (claim != null && Enum.TryParse(claim.Value, out Roles role)) return (int)role;
+            
+            return null;
+        }
     }
 }
