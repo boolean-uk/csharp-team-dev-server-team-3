@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using exercise.wwwapi.Data;
 using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Posts;
@@ -9,7 +8,6 @@ using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using System.Security.Claims;
 
 namespace exercise.wwwapi.Endpoints
@@ -52,7 +50,7 @@ namespace exercise.wwwapi.Endpoints
             int? userid = user.UserRealId();
             User? dbUser = userservice.GetById(userid);
             if (user == null)
-                return Results.NotFound(new ResponseDTO<Object>{Message = "Invalid userID"});
+                return Results.NotFound(new ResponseDTO<Object> { Message = "Invalid userID" });
 
             if (string.IsNullOrWhiteSpace(request.Content))
                 return Results.BadRequest(new ResponseDTO<Object> { Message = "Content cannot be empty" });

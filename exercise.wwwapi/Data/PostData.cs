@@ -1,5 +1,4 @@
 ﻿using exercise.wwwapi.Models;
-using System;
 
 namespace exercise.wwwapi.Data
 {
@@ -63,9 +62,9 @@ namespace exercise.wwwapi.Data
             
             for (int i = 1; i < users.Count / 5; i++)
             {
-                string subject = _subject[random.Next(9-1)];
-                string obj = _objects[random.Next(16-1)];
-                string ending = _endings[random.Next(12-1)];
+                string subject = _subject[random.Next(9 - 1)];
+                string obj = _objects[random.Next(16 - 1)];
+                string ending = _endings[random.Next(12 - 1)];
                 string content = subject + " " + obj + " " + ending;
                 int likes = random.Next(0, 100);
                 int userid = random.Next(0, 100);

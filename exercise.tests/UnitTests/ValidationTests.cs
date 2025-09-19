@@ -1,9 +1,18 @@
 ﻿using exercise.wwwapi.Helpers;
 
 namespace exercise.tests.UnitTests;
+
+/// <summary>
+/// Unit tests for the static <see cref="Validator"/> helpers that gatekeep input format rules.
+/// </summary>
 public class ValidationTests
 {
 
+    /// <summary>
+    /// Ensures <see cref="Validator.Password(string)"/> returns the expected message for representative passwords.
+    /// </summary>
+    /// <param name="input">The password candidate being evaluated.</param>
+    /// <param name="expected">The validator response that should be produced.</param>
     [TestCase("Valid123!", "Accepted")]
     [TestCase("short1!", "Too few characters")]
     [TestCase("noupper123!", "Missing uppercase characters")]
@@ -23,6 +32,11 @@ public class ValidationTests
         Assert.That(result, Is.EqualTo(expected));
     }
 
+    /// <summary>
+    /// Verifies <see cref="Validator.Email(string)"/> distinguishes between valid and invalid email formats.
+    /// </summary>
+    /// <param name="input">The email address under validation.</param>
+    /// <param name="expected">The expected validation outcome message.</param>
     [TestCase("valid@email.com", "Accepted")]
     [TestCase("valid@email.com.no", "Accepted")]
     [TestCase("valid.mail@email.com", "Accepted")]
@@ -46,6 +60,11 @@ public class ValidationTests
         Assert.That(result, Is.EqualTo(expected));
     }
 
+    /// <summary>
+    /// Confirms <see cref="Validator.Username(string)"/> accepts only usernames matching the allowed pattern.
+    /// </summary>
+    /// <param name="input">The username candidate to validate.</param>
+    /// <param name="expected">The descriptive result the validator should return.</param>
     [TestCase("username", "Accepted")]
     [TestCase("user-name", "Accepted")]
     [TestCase("user-name-valid", "Accepted")]
@@ -73,7 +92,6 @@ public class ValidationTests
     [TestCase("username_", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
     [TestCase("user name", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
     [TestCase("øsername", "Username must contain only alphanumeric characters that may be separated by single hyphens")]
-
     public void ValidateUsername(string input, string expected)
     {
         // act 

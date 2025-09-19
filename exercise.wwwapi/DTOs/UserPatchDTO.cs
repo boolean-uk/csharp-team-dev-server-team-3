@@ -1,6 +1,4 @@
-﻿using exercise.wwwapi.Models;
-
-namespace exercise.wwwapi.DTOs
+﻿namespace exercise.wwwapi.DTOs
 {
     public class UserPatchDTO
     {
@@ -17,5 +15,6 @@ namespace exercise.wwwapi.DTOs
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Bio { get; set; }
+        public string? Photo { get; set; }
     }
 }

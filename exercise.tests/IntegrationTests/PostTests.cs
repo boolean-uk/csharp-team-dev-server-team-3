@@ -1,24 +1,17 @@
 ﻿using exercise.wwwapi.DTOs.Login;
 using exercise.wwwapi.DTOs.Posts;
-using exercise.wwwapi.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace exercise.tests.IntegrationTests
 {
+    /// <summary>
+    /// Integration tests covering the lifecycle of posts via the public API endpoints.
+    /// </summary>
     [TestFixture]
     public class PostTests
     {

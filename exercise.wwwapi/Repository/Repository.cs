@@ -10,7 +10,7 @@ namespace exercise.wwwapi.Repository
 
         private DataContext _db;
         private DbSet<T> _table = null;
-       
+
         public Repository(DataContext db)
         {
             _db = db;

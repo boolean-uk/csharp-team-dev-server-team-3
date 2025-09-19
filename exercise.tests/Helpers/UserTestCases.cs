@@ -1,10 +1,13 @@
-using NUnit.Framework;
-using System.Collections.Generic;
-
 namespace exercise.tests.Helpers
 {
+    /// <summary>
+    /// Provides reusable user-centric <see cref="TestCaseData"/> scenarios for integration tests.
+    /// </summary>
     public static class UserTestCases
     {
+        /// <summary>
+        /// Supplies registration payloads that should produce successful responses.
+        /// </summary>
         public static IEnumerable<TestCaseData> ValidRegisterCases()
         {
             yield return new TestCaseData("validuser", "valid@email.com", "ValidPass1!");
@@ -12,6 +15,9 @@ namespace exercise.tests.Helpers
             yield return new TestCaseData("user1name", "user2@example.com", "StrongPass$1");
         }
 
+        /// <summary>
+        /// Supplies registration payloads that should fail validation.
+        /// </summary>
         public static IEnumerable<TestCaseData> InvalidRegisterCases()
         {
             yield return new TestCaseData("validuser", "plainaddress", "ValidPass1!").SetName("Invalid: Invalid email format (register)");
@@ -22,6 +28,9 @@ namespace exercise.tests.Helpers
             yield return new TestCaseData("validuser", "valid@email.com", "NoSpecialChar1").SetName("Invalid: Missing special character (register)");
         }
 
+        /// <summary>
+        /// Supplies credential pairs that represent successful login attempts.
+        /// </summary>
         public static IEnumerable<TestCaseData> ValidLoginCases()
         {
             yield return new TestCaseData("oyvind.perez1@example.com", "SuperHash!4");
@@ -30,6 +39,9 @@ namespace exercise.tests.Helpers
             //yield return new TestCaseData("nigel.nowak2@example.com", "ValidPass1!");
         }
 
+        /// <summary>
+        /// Supplies credential pairs that should fail authentication.
+        /// </summary>
         public static IEnumerable<TestCaseData> InvalidLoginCases()
         {
             yield return new TestCaseData("valid@email.com", "short1!").SetName("Invalid: Password too short (login)");

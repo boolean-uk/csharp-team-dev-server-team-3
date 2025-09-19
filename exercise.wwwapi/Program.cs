@@ -2,12 +2,10 @@ using exercise.wwwapi.Configuration;
 using exercise.wwwapi.Data;
 using exercise.wwwapi.Endpoints;
 using exercise.wwwapi.EndPoints;
-using exercise.wwwapi.Helpers;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -27,8 +25,9 @@ builder.Services.AddScoped<IRepository<PostComment>, Repository<PostComment>>();
 builder.Services.AddScoped<ILogger, Logger<string>>();
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddDbContext<DataContext>(options => {
-    
+builder.Services.AddDbContext<DataContext>(options =>
+{
+
     //options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
     options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
     options.LogTo(message => Debug.WriteLine(message));
