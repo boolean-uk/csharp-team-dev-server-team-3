@@ -19,12 +19,25 @@ namespace workshop.wwwapi.Tools
             CreateMap<Post, PostDTO>();
 
             CreateMap<Cohort, CohortDTO>()
-                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.UserCohorts.Where(u => u.User.Role == Roles.student)))
-                .ForMember(dest => dest.Teachers, opt => opt.MapFrom(src => src.UserCohorts.Where(u => u.User.Role == Roles.teacher)));
+                .ForMember(dest => dest.Courses, opt => opt.MapFrom(src => src.CohortCourses));
+
+            CreateMap<CohortCourseUser, CohortCourseUserDTO>()
+                .ForMember(dest => dest.Course, opt => opt.MapFrom(src => src.Course.Title))
+                .ForMember(dest => dest.Cohort, opt => opt.MapFrom(src => src.Cohort.Title));
+
+            CreateMap<CohortCourse, CourseInCohortDTO>()
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Course.Title))
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(
+                    src => src.CohortCourseUsers
+                        .Where(ccu => ccu.User.Role == Roles.student)
+                        .Select(ccu => ccu.User)))
+                .ForMember(dest => dest.Teachers, opt => opt.MapFrom(
+                    src => src.CohortCourseUsers
+                        .Where(ccu => ccu.User.Role == Roles.teacher)
+                        .Select(ccu => ccu.User)));
 
             CreateMap<UserCohort, UserCohortDTO>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
-            //CreateMap<UserCohortDTO, UserBasicDTO>();
 
             CreateMap<PostComment, PostCommentDTO>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));

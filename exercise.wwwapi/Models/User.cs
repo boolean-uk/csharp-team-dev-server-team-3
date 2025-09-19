@@ -51,7 +51,7 @@ namespace exercise.wwwapi.Models
         public string Photo {  get; set; } = string.Empty;
 
         [JsonIgnore]
-        public ICollection<UserCohort> UserCohorts { get; set; } = new List<UserCohort>();
+        public ICollection<CohortCourseUser> CohortCourseUsers { get; set; } = new List<CohortCourseUser>();
 
     }
 }

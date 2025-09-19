@@ -73,6 +73,12 @@ namespace exercise.wwwapi.Repository
             _table.Remove(existing);
         }
 
+        public void Delete(params object[] ids)
+        {
+            T existing = _table.Find(ids);
+            _table.Remove(existing);
+        }
+
 
         public void Save()
         {

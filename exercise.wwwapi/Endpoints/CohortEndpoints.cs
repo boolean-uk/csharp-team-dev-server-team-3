@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using exercise.wwwapi.DTOs.Cohort;
-using exercise.wwwapi.DTOs.Posts;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.Serialization;
 
 namespace exercise.wwwapi.Endpoints
 {
@@ -17,51 +15,208 @@ namespace exercise.wwwapi.Endpoints
             cohorts.MapPost("/", CreateCohort).WithSummary("Create a cohort");
             cohorts.MapGet("/", GetAllCohorts).WithSummary("Get all cohorts");
             cohorts.MapGet("/{id}", GetCohort).WithSummary("Get a cohort by ID");
-            cohorts.MapPost("/{cohortId}/{userId}", AddUserToCohort).WithSummary("Add user to a cohort");
+            cohorts.MapPost("/{cohortId}/{userId}/{courseId}", AddUserToCohort).WithSummary("Add a user to a cohort");
+            cohorts.MapDelete("/{cohortId}/{userId}/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
         }
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> GetCohort(IRepository<Cohort> service, IMapper mapper, int cohortId)
         {
-            //var result = service.GetById(cohortId);
-            var result = service.GetById(cohortId, q => q.Include(c => c.UserCohorts).ThenInclude(cu => cu.User));
+            var result = service.GetById(cohortId, q => q
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.Course)
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.CohortCourseUsers)
+                        .ThenInclude(ccu => ccu.User));
             CohortDTO cohortDTOs = mapper.Map<CohortDTO>(result);
 
             return TypedResults.Ok(cohortDTOs);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetAllCohorts(IRepository<Cohort> service, IMapper mapper)
+        public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper)
         {
-            IEnumerable<Cohort> results = service.GetWithIncludes(q => q.Include(c => c.UserCohorts).ThenInclude(cu => cu.User));
+            var results = cohortService.GetWithIncludes(q => q
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.Course)
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.CohortCourseUsers)
+                        .ThenInclude(ccu => ccu.User)
+            );
+            Console.WriteLine(results);
+
             IEnumerable<CohortDTO> cohortDTOs = mapper.Map<IEnumerable<CohortDTO>>(results);
 
             return TypedResults.Ok(cohortDTOs);
         }
 
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> CreateCohort(IRepository<Cohort> service, IMapper mapper, CreateCohortDTO request)
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        public static async Task<IResult> CreateCohort(
+            IRepository<Cohort> cohortService,
+            IRepository<Course> courseService,
+            IMapper mapper,
+            CreateCohortDTO request)
         {
             Cohort cohort = new Cohort() { Title = request.Title };
-            service.Insert(cohort);
-            service.Save();
-            CohortDTO response = mapper.Map<CohortDTO>(cohort);
-            return TypedResults.Ok(response);
+
+            string[] defaultCourses = { "Software Development", "Front-End Development", "Data Analytics" };
+            var courses = new List<Course>();
+            foreach (var courseTitle in defaultCourses)
+            {
+                var course = courseService.Table.FirstOrDefault(c => c.Title == courseTitle);
+                if (course == null)
+                {
+                    course = new Course { Title = courseTitle };
+                    courseService.Insert(course);
+                }
+                courses.Add(course);
+            }
+            courseService.Save();
+
+            cohort.CohortCourses = courses.Select(c => new CohortCourse
+            {
+                CourseId = c.Id,
+                Course = c,
+                CohortId = cohort.Id,
+                Cohort = cohort
+            }).ToList();
+
+            cohortService.Insert(cohort);
+            cohortService.Save();
+
+            var response = mapper.Map<CohortDTO>(cohort);
+            return TypedResults.Created($"/api/cohorts/{cohort.Id}", response);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> AddUserToCohort(IRepository<Cohort> cohortservice, IRepository<User> userservice, IMapper mapper, int userId, int cohortId)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public static async Task<IResult> AddUserToCohort(
+                    IRepository<Cohort> cohortService,
+                    IRepository<User> userService,
+                    IRepository<CohortCourse> cohortCourseService,
+                    IRepository<CohortCourseUser> cohortCourseUserService,
+                    IMapper mapper,
+                    int userId,
+                    int cohortId,
+                    int courseId)
         {
-            var user = userservice.GetById(userId);
-            if (user == null) return Results.NotFound();
+            // 1. Get the user
+            var user = userService.GetById(userId);
+            if (user == null) return Results.NotFound($"User with Id {userId} not found.");
 
-            Cohort cohort = cohortservice.GetById(cohortId);
-            if (cohort == null) return Results.NotFound();
+            // 2. Get the cohort including its users and courses for verification steps
+            var cohort = cohortService.GetById(cohortId, q =>
+                q.Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.Course)
+                 .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.CohortCourseUsers)
+                        .ThenInclude(ccu => ccu.User));
 
-            UserCohort userCohort = new UserCohort() { CohortId = cohortId, UserId= userId, Cohort=cohort, User=user };
-            cohort.UserCohorts.Add(userCohort);
-            cohortservice.Save();
-            UserCohortDTO response = mapper.Map<UserCohortDTO>(userCohort);
-            return TypedResults.Ok(response);
+            if (cohort == null) return Results.NotFound($"Cohort with Id {cohortId} not found.");
+
+            // 3. Verify that the course exists in this cohort
+            var cohortCourse = cohort.CohortCourses.FirstOrDefault(cc => cc.CourseId == courseId);
+            if (cohortCourse == null)
+                return Results.BadRequest("The specified course is not part of this cohort.");
+
+            // 4. Check if the user is already in this cohort
+            if (cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
+                return Results.BadRequest("User is already a member of this cohort.");
+
+            // 7. Add user to CohortCourseUser
+            var existingCcu = cohortCourseUserService
+                .GetAllFiltered(ccu => ccu.UserId == userId && ccu.CohortId == cohortId && ccu.CourseId == courseId)
+                .FirstOrDefault();
+
+            if (existingCcu == null)
+            {
+                var ccu = new CohortCourseUser
+                {
+                    UserId = userId,
+                    User = user,
+                    CohortId = cohortId,
+                    Cohort = cohort,
+                    CourseId = courseId,
+                    Course = cohortCourse.Course
+                };
+                cohortCourseUserService.Insert(ccu);
+
+                // 8. Save changes
+                cohortService.Save();
+                //userCourseRepo.Save();
+                cohortCourseUserService.Save();
+
+                // 9. Map response
+                var response = mapper.Map<CohortCourseUserDTO>(ccu);
+                return TypedResults.Ok(response);
+            }
+            return TypedResults.BadRequest();
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public static async Task<IResult> DeleteUserFromCohort(
+                IRepository<Cohort> cohortService,
+                IRepository<User> userService,
+                IRepository<CohortCourse> cohortCourseService,
+                IRepository<CohortCourseUser> cohortCourseUserService,
+                IMapper mapper,
+                int userId,
+                int cohortId,
+                int courseId)
+        {
+            // 1. Get the user
+            var user = userService.GetById(userId);
+            if (user == null) return Results.NotFound($"User with Id {userId} not found.");
+
+            // 2. Get the cohort including its users and courses for verification steps
+            var cohort = cohortService.GetById(cohortId, q =>
+                q.Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.Course)
+                    .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.CohortCourseUsers)
+                        .ThenInclude(ccu => ccu.User));
+
+            if (cohort == null) return Results.NotFound($"Cohort with Id {cohortId} not found.");
+
+            // 3. Verify that the course exists in this cohort
+            var cohortCourse = cohort.CohortCourses.FirstOrDefault(cc => cc.CourseId == courseId);
+            if (cohortCourse == null)
+                return Results.BadRequest("The specified course is not part of this cohort.");
+
+            // 4. Check if the user is already in this cohort
+            if (!cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
+                return Results.BadRequest("User is not a member of this cohort.");
+
+            // 7. Add user to CohortCourseUser
+            var existingCcu = cohortCourseUserService
+                .GetAllFiltered(ccu => ccu.UserId == userId && ccu.CohortId == cohortId && ccu.CourseId == courseId)
+                .FirstOrDefault();
+
+            if (existingCcu != null)
+            {
+                //var ccu = new CohortCourseUser
+                //{
+                //    UserId = userId,
+                //    User = user,
+                //    CohortId = cohortId,
+                //    Cohort = cohort,
+                //    CourseId = courseId,
+                //    Course = cohortCourse.Course
+                //};
+                cohortCourseUserService.Delete(existingCcu.CohortId, existingCcu.CourseId, existingCcu.UserId);
+
+                // 8. Save changes
+                cohortService.Save();
+                //userCourseRepo.Save();
+                cohortCourseUserService.Save();
+
+                // 9. Map response
+                var response = mapper.Map<CohortCourseUserDTO>(existingCcu);
+                return TypedResults.Ok(response);
+            }
+            return TypedResults.BadRequest();
+
         }
     }
 }

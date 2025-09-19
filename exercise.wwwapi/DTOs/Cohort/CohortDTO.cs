@@ -1,11 +1,11 @@
-﻿namespace exercise.wwwapi.DTOs.Cohort
+﻿using exercise.wwwapi.DTOs.GetUsers;
+
+namespace exercise.wwwapi.DTOs.Cohort
 {
     public class CohortDTO
     {
+        public int Id { get; set;  }
         public string Title { get; set; }
-
-        public ICollection<UserCohortDTO> Students { get; set; } = new List<UserCohortDTO>();
-
-        public ICollection<UserCohortDTO> Teachers { get; set; } = new List<UserCohortDTO>();
+        public ICollection<CourseInCohortDTO> Courses { get; set; } = new List<CourseInCohortDTO>();
     }
 }
