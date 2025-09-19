@@ -39,7 +39,7 @@ namespace exercise.tests.IntegrationTests
         private const string StudentEmail1 = "noa.gronningen47@example.com"; // has post id 32 and comment id 37
         private const string StudentPassword1 = "lettPassord123!";
 
-        private const string StudentEmail2 = "anna.gruber160@example.com"; // has post id 32 and comment id 29
+        private const string StudentEmail2 = "anna.gruber160@example.com"; // has post id 32 and commeent id 29
         private const string StudentPassword2 = "Neidintulling!l33t";
 
         private async Task<string> LoginAndGetToken(string email, string password, bool success = true)
