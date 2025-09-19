@@ -1,11 +1,7 @@
 ﻿using exercise.tests.Helpers;
 using exercise.wwwapi.DTOs.Validation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System.Net;
-using System.Net.Http.Json;
-using System.Numerics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -32,11 +28,11 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
-        [TestCase("Valid123!",  HttpStatusCode.OK)]
-        [TestCase("short1!",  HttpStatusCode.BadRequest)]
-        [TestCase("noupper123!",  HttpStatusCode.BadRequest)]
-        [TestCase("NoNumber!",  HttpStatusCode.BadRequest)]
-        [TestCase("NoSpecial1",  HttpStatusCode.BadRequest)]
+        [TestCase("Valid123!", HttpStatusCode.OK)]
+        [TestCase("short1!", HttpStatusCode.BadRequest)]
+        [TestCase("noupper123!", HttpStatusCode.BadRequest)]
+        [TestCase("NoNumber!", HttpStatusCode.BadRequest)]
+        [TestCase("NoSpecial1", HttpStatusCode.BadRequest)]
         [TestCase("V3rySp3ci&l", HttpStatusCode.OK)]
         [TestCase("", HttpStatusCode.BadRequest)]
         [TestCase(null!, HttpStatusCode.BadRequest)]
@@ -74,7 +70,7 @@ namespace exercise.tests.IntegrationTests
 
             // Act
             var response = await _client.PostAsync("/validation/password", requestBody);
-            Console.WriteLine("r,",response);
+            Console.WriteLine("r,", response);
 
             // Assert
             var contentString = await response.Content.ReadAsStringAsync();

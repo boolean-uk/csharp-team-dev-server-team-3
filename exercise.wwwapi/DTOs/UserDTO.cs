@@ -1,5 +1,4 @@
 ﻿using exercise.wwwapi.Models;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace exercise.wwwapi.DTOs
 {
@@ -10,7 +9,7 @@ namespace exercise.wwwapi.DTOs
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? GithubUsername { get; set; }
-        public string? Mobile {  get; set; }
+        public string? Mobile { get; set; }
         public Roles? Role { get; set; }
         public string? Specialism { get; set; }
         public string? Bio { get; set; }

@@ -1,7 +1,4 @@
-﻿using exercise.wwwapi.DTOs.Login;
-using exercise.wwwapi.DTOs.Register;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -30,11 +27,12 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
-        [Test] 
+        [Test]
         public async Task PostCheckInvalidEndpoint()
         {
-            var body = new { 
-                email= $"myemailVery@gmail.com",
+            var body = new
+            {
+                email = $"myemailVery@gmail.com",
                 password = "someR21!password"
             };
             var json = JsonSerializer.Serialize(body);

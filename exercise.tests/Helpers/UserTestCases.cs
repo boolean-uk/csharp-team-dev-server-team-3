@@ -1,6 +1,3 @@
-using NUnit.Framework;
-using System.Collections.Generic;
-
 namespace exercise.tests.Helpers
 {
     public static class UserTestCases

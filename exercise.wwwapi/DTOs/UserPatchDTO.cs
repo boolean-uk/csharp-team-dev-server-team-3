@@ -1,6 +1,4 @@
-﻿using exercise.wwwapi.Models;
-
-namespace exercise.wwwapi.DTOs
+﻿namespace exercise.wwwapi.DTOs
 {
     public class UserPatchDTO
     {

@@ -9,7 +9,7 @@ namespace exercise.wwwapi.Endpoints
             var logs = app.MapGroup("/logs");
             logs.MapPost("/", CreateDeliveryLog).WithSummary("Create a delivery log");
         }
-     
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> CreateDeliveryLog()
         {
