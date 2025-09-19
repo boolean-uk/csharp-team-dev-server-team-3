@@ -57,12 +57,11 @@ namespace exercise.wwwapi.Data
         };
         DateTime somedate = new DateTime(2020, 12, 05, 0, 0, 0, DateTimeKind.Utc);
         private List<Post> _posts = new List<Post>();
-        private int numusers = 300;
         public PostData(List<User> users)
         {
             Random random = new Random(1);
             
-            for (int i = 1; i < 25; i++)
+            for (int i = 1; i < users.Count / 5; i++)
             {
                 string subject = _subject[random.Next(9-1)];
                 string obj = _objects[random.Next(16-1)];

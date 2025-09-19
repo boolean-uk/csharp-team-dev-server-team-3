@@ -103,13 +103,16 @@ namespace exercise.wwwapi.EndPoints
             
             // Check for valid password
             string validationResult = Validator.Password(request.password);
+            Console.WriteLine($"Password: {validationResult}");
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
+            
 
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
+            Console.WriteLine($"Email doesnt exists? {emailExists.Count() == 0}");
             if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided"});
-
+            
 
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
@@ -118,6 +121,7 @@ namespace exercise.wwwapi.EndPoints
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
                 // should probably be 401 unauthorized
+                Console.WriteLine($"Password hashes doesnt match:\n{request.password}\n{user.PasswordHash}");
                 return Results.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided" });
             }
 
@@ -227,8 +231,10 @@ namespace exercise.wwwapi.EndPoints
             List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Sid, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, ((int)user.Role).ToString())
             };
             
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetValue("AppSettings:Token")));

@@ -3,11 +3,13 @@ using exercise.wwwapi.Data;
 using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Posts;
+using exercise.wwwapi.Helpers;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using System.Security.Claims;
 
 namespace exercise.wwwapi.Endpoints
@@ -19,55 +21,62 @@ namespace exercise.wwwapi.Endpoints
             var posts = app.MapGroup("posts");
             posts.MapPost("/", CreatePost).WithSummary("Create post");
             posts.MapGet("/", GetAllPosts).WithSummary("Get all posts");
-            posts.MapPatch("/{id}", UpdatePost).WithSummary("Update a certain post");
-            posts.MapDelete("/{id}", DeletePost).WithSummary("Remove a certain post");
+            posts.MapPatch("/{postid}", UpdatePost).WithSummary("Update a certain post");
+            posts.MapDelete("/{postid}", DeletePost).WithSummary("Remove a certain post");
 
             posts.MapPost("/{postId}/comments", AddCommentToPost).WithSummary("Add a new comment to a post");
             posts.MapGet("/{postId}/comments", GetCommentsForPost).WithSummary("Get comments for a specific post");
 
             // Standalone comment endpoints for editing/deleting
             var comments = app.MapGroup("comments");
-            comments.MapPatch("/{id}", UpdateComment).WithSummary("Edit an existing comment");
-            comments.MapDelete("/{id}", DeleteCommentById).WithSummary("Remove an existing comment");
+            comments.MapPatch("/{commentId}", UpdateComment).WithSummary("Edit an existing comment");
+            comments.MapDelete("/{commentId}", DeleteCommentById).WithSummary("Remove an existing comment");
 
             // Endpoints to get by user
             posts.MapGet("/user/{userId}", GetPostsByUser).WithSummary("Get posts by a specific user");
             comments.MapGet("/user/{userId}", GetCommentsByUser).WithSummary("Get comments by a specific user");
         }
 
-
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static IResult CreatePost(IRepository<User> userservice, IRepository<Post> postservice, IMapper mapper, CreatePostDTO request)
+        public static IResult CreatePost(
+            IRepository<User> userservice, 
+            IRepository<Post> postservice, 
+            IMapper mapper, 
+            ClaimsPrincipal user,
+            CreatePostDTO request
+            )
         {
-
-            User? user = userservice.GetById(request.Userid);
+            int? userid = user.UserRealId();
+            User? dbUser = userservice.GetById(userid);
             if (user == null)
                 return Results.NotFound(new ResponseDTO<Object>{Message = "Invalid userID"});
 
             if (string.IsNullOrWhiteSpace(request.Content))
                 return Results.BadRequest(new ResponseDTO<Object> { Message = "Content cannot be empty" });
 
-            Post post = new Post() { CreatedAt = DateTime.UtcNow, NumLikes = 0, UserId=request.Userid, Content=request.Content };
+            Post post = new Post() { CreatedAt = DateTime.UtcNow, NumLikes = 0, UserId= dbUser.Id, Content=request.Content };
 
             // is a try catch needed here?
             postservice.Insert(post);
             postservice.Save();
 
 
-            UserBasicDTO userBasicDTO = mapper.Map<UserBasicDTO>(user);
+            UserBasicDTO userBasicDTO = mapper.Map<UserBasicDTO>(dbUser);
             PostDTO postDTO = mapper.Map<PostDTO>(post);
             postDTO.User = userBasicDTO;
 
             ResponseDTO<PostDTO> response = new ResponseDTO<PostDTO>
             {
-                Message = "success",
+                Message = "Success",
                 Data = postDTO
             };
 
             return Results.Created($"/posts/{post.Id}", response);
         }
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static IResult GetAllPosts(IRepository<Post> service, IMapper mapper)
         {
@@ -75,7 +84,7 @@ namespace exercise.wwwapi.Endpoints
             IEnumerable<PostDTO> postDTOs = mapper.Map<IEnumerable<PostDTO>>(results);
             ResponseDTO<IEnumerable<PostDTO>> response = new ResponseDTO<IEnumerable<PostDTO>>()
             {
-                Message = "success",
+                Message = "Success",
                 Data = postDTOs
             };
             return TypedResults.Ok(response);
@@ -84,28 +93,25 @@ namespace exercise.wwwapi.Endpoints
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, ClaimsPrincipal user, int id, UpdatePostDTO request)
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+
+        public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, ClaimsPrincipal user, int postid, UpdatePostDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Content)) return TypedResults.BadRequest(new ResponseDTO<object>{
                     Message = "Content cannot be empty"
                 });
             
-            Post? post = service.GetById(id, q=>q.Include(p => p.User));
-
-            
+            Post? post = service.GetById(postid, q=>q.Include(p => p.User));
 
             if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
 
-            var currentUserId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (post.UserId.ToString() != currentUserId)
+            Console.WriteLine($"Role:{user.Role()} {Roles.student}| {post.UserId} {user.UserRealId()}");
+            if (post.UserId != user.UserRealId() && user.Role() == (int)Roles.student)
             {
-                // Create your custom response object
                 var forbiddenResponse = new ResponseDTO<object>
                 {
                     Message = "You are not authorized to edit this post."
                 };
-
-                // Return it as JSON with a 403 Forbidden status code
                 return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
             }
 
@@ -122,23 +128,41 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(new ResponseDTO<PostDTO> { Message = "Success", Data = postDTO });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        private static IResult DeletePost(IRepository<Post> service, int id)
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        private static IResult DeletePost(IRepository<Post> service, ClaimsPrincipal user, int postid)
         {
-            Post? post = service.GetById(id, q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
+            Post? post = service.GetById(postid, q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
             if (post == null) return TypedResults.NotFound(new ResponseDTO<Object> { Message = "Post not found" });
 
-            service.Delete(id);
+            if (user.Role() == (int)Roles.student && post.UserId != user.UserRealId())
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to delete this post."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
+            service.Delete(postid);
             service.Save();
 
             return TypedResults.Ok(new ResponseDTO<PostDTO> { Message = "Success" });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult AddCommentToPost(IRepository<PostComment> commentService, IRepository<Post> postService, IRepository<User> userService, IMapper mapper, int postId, CreatePostCommentDTO request)
+        private static IResult AddCommentToPost(
+            IRepository<PostComment> commentService, 
+            IRepository<Post> postService, 
+            IRepository<User> userService, 
+            IMapper mapper, 
+            ClaimsPrincipal user,
+            int postId, 
+            CreatePostCommentDTO request)
         {
             // Check if post exists
             var post = postService.GetById(postId);
@@ -148,8 +172,8 @@ namespace exercise.wwwapi.Endpoints
             }
 
             // Check if user exists
-            var user = userService.GetById(request.Userid);
-            if (user == null)
+            var dbUser = userService.GetById(user.UserRealId());
+            if (dbUser == null)
             {
                 return TypedResults.NotFound(new ResponseDTO<object> { Message = "User not found." });
             }
@@ -163,7 +187,7 @@ namespace exercise.wwwapi.Endpoints
             var comment = new PostComment
             {
                 Content = request.Content,
-                UserId = request.Userid,
+                UserId = dbUser.Id,
                 PostId = postId,
                 CreatedAt = DateTime.UtcNow
             };
@@ -177,6 +201,7 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Created($"/comments/{comment.Id}", new ResponseDTO<PostCommentDTO> { Message = "Success", Data = commentDto });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         private static IResult GetCommentsForPost(IRepository<Post> postservice, IMapper mapper, int postId)
         {
@@ -190,17 +215,29 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult UpdateComment(IRepository<PostComment> service, IMapper mapper, int id, CreatePostCommentDTO request)
+        private static IResult UpdateComment(
+            IRepository<PostComment> service, 
+            IMapper mapper, 
+            ClaimsPrincipal user, 
+            int commentId, 
+            CreatePostCommentDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Content))
             {
                 return TypedResults.BadRequest(new ResponseDTO<object> { Message = "Content cannot be empty." });
             }
 
-            var comment = service.GetById(id, q => q.Include(c => c.User));
-            if (comment == null)
+            var comment = service.GetById(commentId, q => q.Include(c => c.User));
+            if (comment == null) return TypedResults.NotFound(new ResponseDTO<object> { Message = "Comment not found." });
+
+            //Console.WriteLine($"Role:{user.Role()} {Roles.student.ToString()}| {comment.UserId} {user.UserRealId()}");
+            if (comment.UserId != user.UserRealId() && user.Role() == (int)Roles.student)
             {
-                return TypedResults.NotFound(new ResponseDTO<object> { Message = "Comment not found." });
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to edit this comment."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
             }
 
             comment.Content = request.Content;
@@ -213,22 +250,33 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(new ResponseDTO<PostComment> { Message = "Comment updated successfully.", Data = commentDto });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        private static IResult DeleteCommentById(IRepository<PostComment> service, int id)
+        private static IResult DeleteCommentById(IRepository<PostComment> service, ClaimsPrincipal user, int commentId)
         {
-            var comment = service.GetById(id);
+            var comment = service.GetById(commentId);
             if (comment == null)
             {
                 return TypedResults.NotFound(new ResponseDTO<object> { Message = "Comment not found." });
             }
 
-            service.Delete(id);
+            if (user.Role() == (int)Roles.student && comment.UserId != user.UserRealId())
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to delete this comment."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
+
+            service.Delete(commentId);
             service.Save();
 
             return TypedResults.Ok(new ResponseDTO<object> { Message = "Comment deleted successfully." });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult GetPostsByUser(IRepository<Post> service, IMapper mapper, int userid)
@@ -245,6 +293,7 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(response);
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult GetCommentsByUser(IRepository<PostComment> service, IMapper mapper, int userid)
