@@ -1,7 +1,4 @@
 ﻿using exercise.wwwapi.DTOs.GetUsers;
-using exercise.wwwapi.Models;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace exercise.wwwapi.DTOs.Posts
 {

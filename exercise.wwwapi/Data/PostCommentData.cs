@@ -1,7 +1,4 @@
 ﻿using exercise.wwwapi.Models;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Runtime.InteropServices.JavaScript;
 
 namespace exercise.wwwapi.Data
 {

@@ -1,7 +1,4 @@
 ﻿using exercise.wwwapi.DTOs.GetUsers;
-using exercise.wwwapi.Models;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace exercise.wwwapi.DTOs.Posts
 {
@@ -9,7 +6,7 @@ namespace exercise.wwwapi.DTOs.Posts
     {
         public required int Id { get; set; }
         public UserBasicDTO? User { get; set; }
-        public required string Content { get; set; } 
+        public required string Content { get; set; }
         public required DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public required int NumLikes { get; set; }

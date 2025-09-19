@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing.Internal;
-using System.Text.RegularExpressions;
-using System.Net.Mail;
+﻿using System.Text.RegularExpressions;
 using System.ComponentModel.DataAnnotations;
 
 namespace exercise.wwwapi.Helpers
