@@ -8,6 +8,9 @@ using System.Text.Json.Nodes;
 
 namespace exercise.tests.IntegrationTests
 {
+    /// <summary>
+    /// Integration coverage for the validation endpoints, ensuring parity with business rules.
+    /// </summary>
     public class ValidationTests
     {
         private WebApplicationFactory<Program> _factory;
@@ -28,6 +31,11 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
+        /// <summary>
+        /// Ensures the password validation endpoint surfaces the correct status code per input.
+        /// </summary>
+        /// <param name="input">The password candidate supplied to the endpoint.</param>
+        /// <param name="statusCode">The HTTP status the endpoint should yield.</param>
         [TestCase("Valid123!", HttpStatusCode.OK)]
         [TestCase("short1!", HttpStatusCode.BadRequest)]
         [TestCase("noupper123!", HttpStatusCode.BadRequest)]
@@ -51,7 +59,11 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(statusCode));
         }
 
-        //[TestCase(5, "Something went wrong!")]
+        /// <summary>
+        /// Confirms the password validation endpoint responds with the expected descriptive message.
+        /// </summary>
+        /// <param name="input">The password candidate supplied to the endpoint.</param>
+        /// <param name="expected">The human-readable validation message expected in the response.</param>
         [TestCase("Valid123!", "Accepted")]
         [TestCase("short1!", "Too few characters")]
         [TestCase("noupper123!", "Missing uppercase characters")]
@@ -86,6 +98,11 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message?["message"]?.ToString(), Is.EqualTo(expected));
         }
 
+        /// <summary>
+        /// Ensures email validation returns success or failure statuses for the appropriate inputs.
+        /// </summary>
+        /// <param name="input">The email address being validated.</param>
+        /// <param name="statusCode">The expected HTTP status code.</param>
         [TestCase("valid@email.com", HttpStatusCode.OK)]
         [TestCase("valid@email.com.no", HttpStatusCode.OK)]
         [TestCase("valid.mail@email.com", HttpStatusCode.OK)]
@@ -107,6 +124,11 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(statusCode));
         }
 
+        /// <summary>
+        /// Confirms the email validation endpoint returns the expected descriptive message.
+        /// </summary>
+        /// <param name="input">The email address being validated.</param>
+        /// <param name="expected">The textual message expected from the endpoint.</param>
         [TestCase("valid@email.com", "Accepted")]
         [TestCase("valid@email.com.no", "Accepted")]
         [TestCase("valid.mail@email.com", "Accepted")]
@@ -140,13 +162,12 @@ namespace exercise.tests.IntegrationTests
 
 
         /// <summary>
-        /// Testing username validation. Asserting that response status codes are correct.
-        /// Test cases are defined in <see cref="UsernameValidationTestData"/>.
+        /// Validates that username endpoints return the expected status codes for each input permutation.
         /// </summary>
-        /// <param name="endpoint"> The endpoint. All cases run with endpoints "username" and "git-username".</param>
-        /// <param name="input"> The provided input.</param>
-        /// <param name="expected"> The expected response status code.</param>
-        /// <returns></returns>
+        /// <remarks>Data is sourced from <see cref="UsernameValidationTestData.UsernameValidationStatusCases"/> and executes against both username endpoints.</remarks>
+        /// <param name="endpoint">The endpoint under test (`username` or `git-username`).</param>
+        /// <param name="input">The username candidate passed to the API.</param>
+        /// <param name="expected">The HTTP status expected in the response.</param>
         [Test, TestCaseSource(typeof(UsernameValidationTestData), nameof(UsernameValidationTestData.UsernameValidationStatusCases))]
         public async Task ValidateUsernameStatus(string endpoint, string input, HttpStatusCode expected)
         {
@@ -162,13 +183,12 @@ namespace exercise.tests.IntegrationTests
 
 
         /// <summary>
-        /// Testing username validation. Asserting that response messages are correct.
-        /// Test cases are defined in <see cref="UsernameValidationTestData"/>.
+        /// Verifies that username validation messages explain the pass or fail outcome for each sample.
         /// </summary>
-        /// <param name="endpoint"> The endpoint. All cases run with endpoints "username" and "git-username".</param>
-        /// <param name="input"> The provided input.</param>
-        /// <param name="expected"> The expected response message.</param>
-        /// <returns></returns>
+        /// <remarks>Data is sourced from <see cref="UsernameValidationTestData.UsernameValidationMessageCases"/> and executed against both endpoints.</remarks>
+        /// <param name="endpoint">The endpoint under test (`username` or `git-username`).</param>
+        /// <param name="input">The username candidate passed to the API.</param>
+        /// <param name="expected">The message expected in the API response.</param>
         [Test, TestCaseSource(typeof(UsernameValidationTestData), nameof(UsernameValidationTestData.UsernameValidationMessageCases))]
         public async Task ValidateUsernameMessage(string endpoint, string input, string expected)
         {
@@ -192,6 +212,12 @@ namespace exercise.tests.IntegrationTests
         }
 
 
+        /// <summary>
+        /// Confirms the username-exists endpoint flags duplicates while allowing unused values.
+        /// </summary>
+        /// <param name="input">The username to query.</param>
+        /// <param name="expectedMessage">The message expected from the API.</param>
+        /// <param name="expectedStatusCode">The HTTP status code that should be returned.</param>
         [TestCase("donald-esposito121", "Username is already in use", HttpStatusCode.BadRequest)]
         [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
@@ -217,6 +243,12 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
 
+        /// <summary>
+        /// Confirms the GitHub username existence check returns appropriate responses for duplicates.
+        /// </summary>
+        /// <param name="input">The GitHub username to query.</param>
+        /// <param name="expectedMessage">The response message expected.</param>
+        /// <param name="expectedStatusCode">The HTTP status the endpoint should emit.</param>
         [TestCase("donald-esposito121", "GitHub username is already in use", HttpStatusCode.BadRequest)]
         [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateGitUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
@@ -241,6 +273,12 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
         }
 
+        /// <summary>
+        /// Ensures the email existence validation differentiates between duplicates and available emails.
+        /// </summary>
+        /// <param name="input">The email to query.</param>
+        /// <param name="expectedMessage">The message expected in the response.</param>
+        /// <param name="expectedStatusCode">The HTTP status the endpoint should emit.</param>
         [TestCase("nigel.nowak2@example.com", "Email already exists", HttpStatusCode.BadRequest)]
         [TestCase("valid@email.com.no", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateEmailExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)

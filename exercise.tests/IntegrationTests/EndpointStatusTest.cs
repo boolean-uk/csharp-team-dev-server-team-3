@@ -6,6 +6,9 @@ using System.Text.Json.Nodes;
 
 namespace exercise.tests.IntegrationTests
 {
+    /// <summary>
+    /// Integration smoke tests that ensure unexpected endpoints return consistent error responses.
+    /// </summary>
     [TestFixture]
     public class EndpointStatusTest
     {
@@ -27,6 +30,9 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
+        /// <summary>
+        /// Verifies POST requests to unknown routes return a 404 with the canonical payload.
+        /// </summary>
         [Test]
         public async Task PostCheckInvalidEndpoint()
         {
@@ -57,6 +63,9 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Endpoint not found"));
         }
 
+        /// <summary>
+        /// Verifies GET requests to unknown routes return a 404 with the canonical payload.
+        /// </summary>
         [Test]
         public async Task GetCheckInvalidEndpoint()
         {
