@@ -193,6 +193,15 @@ namespace exercise.wwwapi.EndPoints
             var user = repository.GetById(id);
 
             if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
+            
+            if (user.Id != claims.UserRealId() && claims.Role() == (int)Roles.student)
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to edit this post."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
 
             if (userPatch.Username != null && userPatch.Username != user.Username)
             {
