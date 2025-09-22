@@ -82,8 +82,6 @@ namespace exercise.tests.IntegrationTests
         public async Task Register_Failure(string username, string email, string password)
         {
             var uniqueId = DateTime.UtcNow.ToString("yyMMddHHmmssffff");
-            string firstName = "Ole";
-            string lastName = "Petterson";
 
             string uniqueUsername = username.Length > 0 ? username + uniqueId : "";
             RegisterRequestDTO body = new RegisterRequestDTO
