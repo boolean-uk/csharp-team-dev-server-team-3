@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using exercise.tests.Helpers;
+using exercise.wwwapi.DTOs;
 
 namespace exercise.tests.IntegrationTests
 {
@@ -13,26 +14,8 @@ namespace exercise.tests.IntegrationTests
     /// Integration tests exercising the user management endpoints end-to-end via the API surface.
     /// </summary>
     [TestFixture]
-    public class UserTests
+    public class UserTests : BaseIntegrationTest
     {
-        private WebApplicationFactory<Program> _factory;
-        private HttpClient _client;
-
-        [SetUp]
-        public void SetUp()
-        {
-            // Arrange 
-            _factory = new WebApplicationFactory<Program>();
-            _client = _factory.CreateClient();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _client.Dispose();
-            _factory.Dispose();
-        }
-
         /// <summary>
         /// Confirms that valid registration payloads yield an HTTP 201 Created response.
         /// </summary>
@@ -193,19 +176,18 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserSuccess()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>
+            var fieldsToUpdate = new UserPatchDTO()
             {
-                { "username", "roman-olsen13"},
-                { "email", "roman.olsen13@example.com"},
-                { "password", "aGoodPassword!200" },
-                { "role", 0}
+                Username = "roman-olsen13",
+                Email = "roman.olsen13@example.com",
+                Password = "aGoodPassword!200" ,
+                Role = 0
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
+
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
@@ -216,14 +198,12 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserNullFieldsOnly()
         {
-            var fieldsToUpdate = new Dictionary<string, object?> { };
-
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+            var fieldsToUpdate = new UserPatchDTO();
+            
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
             int userId = 1;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
-
+            
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -233,17 +213,15 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserInvalidUsername()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>
+            var fieldsToUpdate = new UserPatchDTO()
             {
-                { "username", "roman--olsen13"}
+                GithubUsername = "roman--olsen13"
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
-
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
+            
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -253,17 +231,15 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserInvalidGitHubUsername()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>
+            var fieldsToUpdate = new UserPatchDTO()
             {
-                { "gitHubUsername", "roman--olsen13"}
+                GithubUsername = "roman--olsen13"
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
-
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
+            
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -273,9 +249,9 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserInvalidEmail()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>
+            var fieldsToUpdate = new UserPatchDTO()
             {
-                { "email", "roman.olsen13@.e.com"}
+                Email = "roman.olsen13@.e.com"
             };
 
             var json = JsonSerializer.Serialize(fieldsToUpdate);
@@ -353,16 +329,15 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserGitHubUsernameExists()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>
+            var fieldsToUpdate = new UserPatchDTO()
             {
-                { "gitHubUsername", "nigel-nowak2"}
+                GithubUsername = "nigel-nowak2"
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
+            
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -373,16 +348,15 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task UpdateUserEmailExists()
         {
-            var fieldsToUpdate = new Dictionary<string, object?>
+            var fieldsToUpdate = new UserPatchDTO()
             {
-                { "email", "nigel.nowak2@example.com"}
+                Email="nigel.nowak2@example.com"
             };
-
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+            
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
+            
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -396,7 +370,9 @@ namespace exercise.tests.IntegrationTests
         [TestCase("10000000", HttpStatusCode.NotFound)]
         public async Task GetUserByIdTest(string id, HttpStatusCode responseStatus)
         {
-            var response = await _client.GetAsync($"/users/{id}");
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
+            
+            var response = await SendAuthenticatedGetAsync($"/users/{id}", token);
             Assert.That(response.StatusCode, Is.EqualTo(responseStatus));
 
         }

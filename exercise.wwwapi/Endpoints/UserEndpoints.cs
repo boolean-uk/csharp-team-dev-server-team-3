@@ -29,6 +29,22 @@ namespace exercise.wwwapi.EndPoints
             users.MapPatch("/{id:int}", UpdateUser).WithSummary("Update a user");
         }
         
+        /// <summary>
+        /// Retrieves users, optionally filtered by a case-insensitive search on first name, last name, or full name.
+        /// </summary>
+        /// <param name="repository">
+        /// The user repository used to fetch users.
+        /// </param>
+        /// <param name="claims">
+        /// <see cref="ClaimsPrincipal"/>-user that authorizes the user to use this endpoint.
+        /// </param>
+        /// <param name="name">
+        /// Optional search term to filter users by first name, last name, or "FirstName LastName".
+        /// </param>
+        /// <returns>
+        /// <see cref="IResult"/> with a 200 OK containing a <see cref="ResponseDTO{T}"/> of <see cref="UsersSuccessDTO"/> on success,
+        /// or a 401 Unauthorized if the caller is not authorized.
+        /// </returns>
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -57,32 +73,29 @@ namespace exercise.wwwapi.EndPoints
             return TypedResults.Ok(response);
         }
         
+        // TODO: Docstring
         // Public endpoint, not authorized
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         private static IResult Register(IRepository<User> repository, IMapper mapper, RegisterRequestDTO request)
         {
-            // syntax checks
-            // check valid password
+            // Validate password
             string validationResult = Validator.Password(request.password);
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = validationResult });
-            // check valid email
+            
+            // Validate email
             string emailValidation = Validator.Email(request.email);
             if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = emailValidation });
-
-            // check if email is in database
             var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
             if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<string>() { Message = "Fail" });
-
-
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
-
-            var user = new User();
-
-            user.PasswordHash = passwordHash;
-            user.Email = request.email;
-
+            
+            // Put user
+            var user = new User
+            {
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.password),
+                Email = request.email
+            };
             repository.Insert(user);
             repository.Save();
 
@@ -95,6 +108,7 @@ namespace exercise.wwwapi.EndPoints
             return Results.Created($"/users/{user.Id}", response);
         }
         
+        // TODO: Docstring
         // Public endpoint (not authorized)
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -107,13 +121,13 @@ namespace exercise.wwwapi.EndPoints
             // Check for valid password
             string validationResult = Validator.Password(request.password);
             Console.WriteLine($"Password: {validationResult}");
-            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid bruh 3 ded" });
+            if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
             
 
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid emadagffdsghgfsdfgsgsdfgdfsrovided" });
+            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
             
             User user = repository.GetAll().FirstOrDefault(u => u.Email == request.email)!;
 
