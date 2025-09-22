@@ -37,9 +37,10 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public static IResult CreatePost(
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        private static IResult CreatePost(
             IRepository<User> userservice, 
             IRepository<Post> postservice, 
             IMapper mapper, 
@@ -74,9 +75,11 @@ namespace exercise.wwwapi.Endpoints
 
             return Results.Created($"/posts/{post.Id}", response);
         }
+        
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static IResult GetAllPosts(IRepository<Post> service, IMapper mapper)
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        private static IResult GetAllPosts(IRepository<Post> service, IMapper mapper)
         {
             IEnumerable<Post> results = service.GetWithIncludes(q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
             IEnumerable<PostDTO> postDTOs = mapper.Map<IEnumerable<PostDTO>>(results);
@@ -91,9 +94,10 @@ namespace exercise.wwwapi.Endpoints
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
 
-        public static IResult UpdatePost(IRepository<Post> service, IMapper mapper, ClaimsPrincipal user, int postid, UpdatePostDTO request)
+        private static IResult UpdatePost(IRepository<Post> service, IMapper mapper, ClaimsPrincipal user, int postid, UpdatePostDTO request)
         {
             if (string.IsNullOrWhiteSpace(request.Content)) return TypedResults.BadRequest(new ResponseDTO<object>{
                     Message = "Content cannot be empty"
@@ -128,8 +132,9 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult DeletePost(IRepository<Post> service, ClaimsPrincipal user, int postid)
         {
             Post? post = service.GetById(postid, q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
@@ -151,8 +156,9 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult AddCommentToPost(
             IRepository<PostComment> commentService, 
             IRepository<Post> postService, 
@@ -201,6 +207,7 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         private static IResult GetCommentsForPost(IRepository<Post> postservice, IMapper mapper, int postId)
         {
             Post? post = postservice.GetById(postId, q => q.Include(p => p.User).Include(p => p.Comments).ThenInclude(c => c.User));
@@ -209,10 +216,12 @@ namespace exercise.wwwapi.Endpoints
             List<PostCommentDTO> commentsDTO = mapper.Map<List<PostCommentDTO>>(comments);
             return TypedResults.Ok(new ResponseDTO<List<PostCommentDTO>> { Message = "Success", Data = commentsDTO });
         }
-
+        
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult UpdateComment(
             IRepository<PostComment> service, 
             IMapper mapper, 
@@ -250,6 +259,7 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult DeleteCommentById(IRepository<PostComment> service, ClaimsPrincipal user, int commentId)
         {
@@ -276,6 +286,7 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult GetPostsByUser(IRepository<Post> service, IMapper mapper, int userid)
         {
@@ -293,6 +304,7 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         private static IResult GetCommentsByUser(IRepository<PostComment> service, IMapper mapper, int userid)
         {

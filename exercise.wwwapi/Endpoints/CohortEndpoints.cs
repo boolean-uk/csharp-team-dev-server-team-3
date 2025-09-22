@@ -9,8 +9,9 @@ namespace exercise.wwwapi.Endpoints
             var cohorts = app.MapGroup("cohorts");
             cohorts.MapPost("/", CreateCohort).WithSummary("Create a cohort");
         }
+        
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> CreateCohort()
+        private static async Task<IResult> CreateCohort()
         {
             return TypedResults.Ok();
         }

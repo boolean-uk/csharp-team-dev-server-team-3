@@ -633,7 +633,6 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task GetCommentsByUser_Success()
         {
-
             //Assert get token
             var token = await LoginAndGetToken("oyvind.perez1@example.com", "SuperHash!4");
 
