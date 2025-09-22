@@ -215,7 +215,7 @@ namespace exercise.tests.IntegrationTests
         {
             var fieldsToUpdate = new UserPatchDTO()
             {
-                GithubUsername = "roman--olsen13"
+                Username = "roman--olsen13"
             };
 
             int userId = 13;
