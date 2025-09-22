@@ -45,7 +45,7 @@ namespace exercise.wwwapi.Repository
             IQueryable<T> query = includeQuery(_table);
             return query.ToList();
         }
-        public T GetById(object id)
+        public T? GetById(object? id)
         {
             return _table.Find(id);
         }
