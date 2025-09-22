@@ -17,8 +17,8 @@ namespace exercise.wwwapi.Endpoints
             var cohorts = app.MapGroup("cohorts");
             cohorts.MapPost("/", CreateCohort).WithSummary("Create a cohort");
             cohorts.MapGet("/", GetAllCohorts).WithSummary("Get all cohorts");
-            cohorts.MapGet("/{id}", GetCohort).WithSummary("Get a cohort by ID");
-            //cohorts.MapGet("/{userId}", GetCohortByUserId).WithSummary("");
+            cohorts.MapGet("/cohortId/{id}", GetCohort).WithSummary("Get a cohort by ID");
+            cohorts.MapGet("/userId/{userId}", GetCohortByUserId).WithSummary("Get all cohorts a user is in by its Id");
             cohorts.MapPost("/{cohortId}/{userId}/{courseId}", AddUserToCohort).WithSummary("Add a user to a cohort");
             cohorts.MapDelete("/{cohortId}/{userId}/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
         }
@@ -32,6 +32,14 @@ namespace exercise.wwwapi.Endpoints
                 .Include(c => c.CohortCourses)
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
+
+            if (result == null)
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"Cohort with id '{cohortId}' does not exists",
+                    Data = result
+                });
+
             CohortDTO cohortDTO = mapper.Map<CohortDTO>(result);
             ResponseDTO<CohortDTO> response = new ResponseDTO<CohortDTO>()
             {
@@ -44,6 +52,35 @@ namespace exercise.wwwapi.Endpoints
             //return TypedResults.Ok(cohortDTOs);
         }
 
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public static async Task<IResult> GetCohortByUserId(IRepository<Cohort> cohortRepo, IMapper mapper, int userId) 
+        {
+            var results = cohortRepo.GetWithIncludes(q => q
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.Course)
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.CohortCourseUsers)
+                        .ThenInclude(ccu => ccu.User)
+            ).Where(r => r.CohortCourses.Any(cc => cc.CohortCourseUsers.Any(ccu => ccu.UserId == userId)));
+
+            if (!results.Any())
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"User with id {userId} either does not exist, or is not registered in any cohorts",
+                    Data = results
+                });
+
+            IEnumerable<CohortDTO> cohortDTOs = mapper.Map<IEnumerable<CohortDTO>>(results);
+            ResponseDTO<IEnumerable<CohortDTO>> response = new ResponseDTO<IEnumerable<CohortDTO>>()
+            {
+                Message = "Success",
+                Data = cohortDTOs
+            };
+
+            return TypedResults.Ok(response);
+        }
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper)
         {
@@ -54,7 +91,6 @@ namespace exercise.wwwapi.Endpoints
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User)
             );
-            Console.WriteLine(results);
 
             IEnumerable<CohortDTO> cohortDTOs = mapper.Map<IEnumerable<CohortDTO>>(results);
             ResponseDTO<IEnumerable<CohortDTO>> response = new ResponseDTO<IEnumerable<CohortDTO>>()
