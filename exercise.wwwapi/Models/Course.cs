@@ -1,17 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace exercise.wwwapi.Models
 {
-    [Table("cohorts")]
-    public class Cohort
+    public class Course
     {
         [Key, Column("id")]
         public int Id { get; set; }
         [Column("title")]
-        public string Title { get; set; } = string.Empty;
-        [JsonIgnore]
+        public string Title { get; set; }
         public ICollection<CohortCourse> CohortCourses { get; set; } = new List<CohortCourse>();
+        
     }
 }
