@@ -44,7 +44,7 @@ namespace exercise.tests.IntegrationTests
             using (Assert.EnterMultipleScope())
             {
                 Assert.That(post?["id"]?.GetValue<int>(), Is.GreaterThan(0));
-                Assert.That(post["content"]?.GetValue<string>(), Is.Not.Null);
+                Assert.That(post?["content"]?.GetValue<string>(), Is.Not.Null);
                 Assert.That(post["numLikes"]?.GetValue<int>(), Is.Not.Null);
                 Assert.That(post["createdAt"], Is.Not.Null);
             }
