@@ -1,7 +1,5 @@
-﻿using exercise.wwwapi.Configuration;
-using exercise.wwwapi.Models;
+﻿using exercise.wwwapi.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Numerics;
 
 namespace exercise.wwwapi.Data
 {

@@ -8,10 +8,7 @@ using exercise.wwwapi.Helpers;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ActionConstraints;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -47,11 +44,11 @@ namespace exercise.wwwapi.EndPoints
                     ).ToList()
                     : results.ToList()
             };
-            ResponseDTO <UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>() 
-                {
-                    Message = "success", 
-                    Data = userData 
-                };
+            ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>()
+            {
+                Message = "success",
+                Data = userData
+            };
             return TypedResults.Ok(response);
         }
 
@@ -72,14 +69,14 @@ namespace exercise.wwwapi.EndPoints
             // check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
             if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<string>() { Message = "Fail" });
-            
+
 
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
 
             var user = new User();
 
             user.PasswordHash = passwordHash;
-            user.Email = request.email; 
+            user.Email = request.email;
 
             service.Insert(user);
             service.Save();
@@ -101,7 +98,7 @@ namespace exercise.wwwapi.EndPoints
             //if (string.IsNullOrEmpty(request.username)) request.username = request.email;
 
             // HAVE to check for valid email/password before verifying if the user already exists, otherwise breach of security
-            
+
             // Check for valid password
             string validationResult = Validator.Password(request.password);
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
@@ -109,13 +106,13 @@ namespace exercise.wwwapi.EndPoints
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = service.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided"});
+            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
 
 
 
             User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
-           
-            
+
+
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
                 // TypedResults.Unauthorized did not support Message. "Custom" solution which includes message. 
@@ -138,8 +135,8 @@ namespace exercise.wwwapi.EndPoints
                 }
             };
 
-            return Results.Ok(response) ;
-           
+            return Results.Ok(response);
+
         }
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -162,7 +159,7 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch, IMapper mapper)
         {
-            if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null)) 
+            if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null))
                 return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Provide at least one field for update" });
 
             var user = repository.GetById(id);
@@ -208,11 +205,11 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.FirstName != null) user.FirstName = userPatch.FirstName;
             if (userPatch.LastName != null) user.LastName = userPatch.LastName;
             if (userPatch.Mobile != null) user.Mobile = userPatch.Mobile;
-            if (userPatch.Role != null) 
+            if (userPatch.Role != null)
             {
                 if (userPatch.Role == 0) { user.Role = Roles.student; }
                 else if (userPatch.Role == 1) { user.Role = Roles.teacher; }
-                else {return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Role does not exist" });}
+                else { return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Role does not exist" }); }
             }
             if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
             // TODO: Add cohort support after implementing the Cohort model and adding it to user.
@@ -241,7 +238,7 @@ namespace exercise.wwwapi.EndPoints
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email)
             };
-            
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetValue("AppSettings:Token")));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var token = new JwtSecurityToken(

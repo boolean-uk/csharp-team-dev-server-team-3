@@ -1,7 +1,4 @@
-﻿using exercise.wwwapi.DTOs.Login;
-using exercise.wwwapi.DTOs.Register;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -9,6 +6,9 @@ using System.Text.Json.Nodes;
 
 namespace exercise.tests.IntegrationTests
 {
+    /// <summary>
+    /// Integration smoke tests that ensure unexpected endpoints return consistent error responses.
+    /// </summary>
     [TestFixture]
     public class EndpointStatusTest
     {
@@ -30,11 +30,15 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
-        [Test] 
+        /// <summary>
+        /// Verifies POST requests to unknown routes return a 404 with the canonical payload.
+        /// </summary>
+        [Test]
         public async Task PostCheckInvalidEndpoint()
         {
-            var body = new { 
-                email= $"myemailVery@gmail.com",
+            var body = new
+            {
+                email = $"myemailVery@gmail.com",
                 password = "someR21!password"
             };
             var json = JsonSerializer.Serialize(body);
@@ -59,6 +63,9 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Endpoint not found"));
         }
 
+        /// <summary>
+        /// Verifies GET requests to unknown routes return a 404 with the canonical payload.
+        /// </summary>
         [Test]
         public async Task GetCheckInvalidEndpoint()
         {

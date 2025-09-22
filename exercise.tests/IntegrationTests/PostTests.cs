@@ -1,17 +1,15 @@
 ﻿using exercise.wwwapi.DTOs.Posts;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace exercise.tests.IntegrationTests
 {
+    /// <summary>
+    /// Integration tests covering the lifecycle of posts via the public API endpoints.
+    /// </summary>
     [TestFixture]
     public class PostTests
     {
@@ -33,6 +31,9 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
+        /// <summary>
+        /// Ensures GET /posts returns a successful response and the expected payload structure.
+        /// </summary>
         [Test]
         public async Task GetAllPosts()
         {
@@ -82,6 +83,9 @@ namespace exercise.tests.IntegrationTests
             }
         }
 
+        /// <summary>
+        /// Confirms creating a post with valid data yields an HTTP 201 Created status.
+        /// </summary>
         [Test]
         public async Task SuccessfulCreatePostStatus()
         {
@@ -111,6 +115,9 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
         }
 
+        /// <summary>
+        /// Validates the create post response body mirrors the request payload and contracts.
+        /// </summary>
         [Test]
         public async Task SuccessfulCreatePostMessage()
         {
@@ -161,6 +168,12 @@ namespace exercise.tests.IntegrationTests
             Assert.That(data["createdAt"], Is.Not.Null);
         }
 
+        /// <summary>
+        /// Checks that invalid create post requests surface the correct HTTP status codes.
+        /// </summary>
+        /// <param name="userid">The author identifier to include in the payload.</param>
+        /// <param name="content">The post body content being validated.</param>
+        /// <param name="expected">The status code the API should return.</param>
         [TestCase(9999999, "somecontent", HttpStatusCode.NotFound)]
         [TestCase(5, "", HttpStatusCode.BadRequest)]
         [TestCase(5, "      ", HttpStatusCode.BadRequest)]
@@ -191,6 +204,12 @@ namespace exercise.tests.IntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(expected));
         }
 
+        /// <summary>
+        /// Ensures the validation error message matches expectations for rejected create post attempts.
+        /// </summary>
+        /// <param name="userid">The author identifier placed in the request.</param>
+        /// <param name="content">The invalid content variation under test.</param>
+        /// <param name="expectedmessage">The message the API should return.</param>
         [TestCase(9999999, "somecontent", "Invalid userID")]
         [TestCase(5, "", "Content cannot be empty")]
         [TestCase(5, "      ", "Content cannot be empty")]
@@ -224,6 +243,9 @@ namespace exercise.tests.IntegrationTests
             Assert.That(message["data"], Is.Null);
             Assert.That(message["timestamp"], Is.Not.Null);
         }
+        /// <summary>
+        /// Validates that deleting an existing post succeeds and a second deletion reports not found.
+        /// </summary>
         [Test]
         public async Task DeletePostById_SuccessAndNotFound()
         {
@@ -262,6 +284,12 @@ namespace exercise.tests.IntegrationTests
 
 
 
+        /// <summary>
+        /// Exercises the PATCH /posts/{id} endpoint across happy path and error scenarios.
+        /// </summary>
+        /// <param name="postId">The identifier of the post to update.</param>
+        /// <param name="newContent">The updated content supplied.</param>
+        /// <param name="expected">The anticipated HTTP status code.</param>
         [TestCase(5, "Updated content", HttpStatusCode.OK)]
         [TestCase(9999999, "Updated content", HttpStatusCode.NotFound)]
         [TestCase(5, "", HttpStatusCode.BadRequest)]

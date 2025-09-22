@@ -1,14 +1,17 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 
 namespace exercise.tests.Helpers
 {
+    /// <summary>
+    /// Centralises username validation scenarios for reuse across integration tests.
+    /// </summary>
     public static class UsernameValidationTestData
     {
+        /// <summary>
+        /// Yields username samples alongside the expected message outcome for each endpoint.
+        /// </summary>
         public static IEnumerable<TestCaseData> UsernameValidationMessageCases()
-        { 
+        {
             string[] endpoints = new string[]
             {
                 "username",
@@ -56,6 +59,9 @@ namespace exercise.tests.Helpers
             }
 
         }
+        /// <summary>
+        /// Yields username samples alongside the expected status code for each endpoint.
+        /// </summary>
         public static IEnumerable<TestCaseData> UsernameValidationStatusCases()
         {
             string[] endpoints = new string[]
@@ -103,6 +109,6 @@ namespace exercise.tests.Helpers
                 }
             }
         }
-    
+
     }
 }

@@ -3,10 +3,7 @@ using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.Cohort;
 using exercise.wwwapi.DTOs.GetUsers;
 using exercise.wwwapi.DTOs.Posts;
-using exercise.wwwapi.DTOs.Register;
 using exercise.wwwapi.Models;
-using System;
-using System.Numerics;
 
 namespace workshop.wwwapi.Tools
 {
