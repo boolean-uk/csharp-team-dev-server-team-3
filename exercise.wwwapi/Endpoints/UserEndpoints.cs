@@ -35,6 +35,9 @@ namespace exercise.wwwapi.EndPoints
         /// <param name="repository">
         /// The user repository used to fetch users.
         /// </param>
+        /// <param name="claims">
+        /// <see cref="ClaimsPrincipal"/>-user that authorizes the user to use this endpoint.
+        /// </param>
         /// <param name="name">
         /// Optional search term to filter users by first name, last name, or "FirstName LastName".
         /// </param>
@@ -45,8 +48,15 @@ namespace exercise.wwwapi.EndPoints
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        private static async Task<IResult> GetUsers(IRepository<User> repository, string? name)
+        private static async Task<IResult> GetUsers(IRepository<User> repository, ClaimsPrincipal claims, string? name)
         {
+            int? id  = claims.UserRealId();
+            if (id == null)
+            {
+                return TypedResults.Ok(new ResponseDTO<object>()
+                    { Message = "Invalid token" });
+            }
+
             IEnumerable<User> results = await repository.Get();
             string? search = name?.Trim().ToLower();
             
