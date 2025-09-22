@@ -49,9 +49,9 @@ namespace exercise.wwwapi.Endpoints
             )
         {
             int? userid = user.UserRealId();
+            if ( userid == null ) return Results.NotFound(new ResponseDTO<Object> { Message = "UserId missing" });
             User? dbUser = userservice.GetById(userid);
-            if (user == null)
-                return Results.NotFound(new ResponseDTO<Object> { Message = "Invalid userID" });
+            if (dbUser == null) return Results.NotFound(new ResponseDTO<Object> { Message = "Invalid userID" });
 
             if (string.IsNullOrWhiteSpace(request.Content))
                 return Results.BadRequest(new ResponseDTO<Object> { Message = "Content cannot be empty" });
@@ -176,7 +176,9 @@ namespace exercise.wwwapi.Endpoints
             }
 
             // Check if user exists
-            var dbUser = userService.GetById(user.UserRealId());
+            int? userid = user.UserRealId();
+            if (userid == null) return Results.NotFound(new ResponseDTO<Object> { Message = "UserId missing" });
+            var dbUser = userService.GetById(userid);
             if (dbUser == null)
             {
                 return TypedResults.NotFound(new ResponseDTO<object> { Message = "User not found." });
