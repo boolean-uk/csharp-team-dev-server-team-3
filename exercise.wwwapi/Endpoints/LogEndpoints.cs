@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace exercise.wwwapi.Endpoints
 {
@@ -10,10 +11,12 @@ namespace exercise.wwwapi.Endpoints
             logs.MapPost("/", CreateDeliveryLog).WithSummary("Create a delivery log");
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> CreateDeliveryLog()
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        private static Task<IResult> CreateDeliveryLog()
         {
-            return TypedResults.Ok();
+            return Task.FromResult<IResult>(TypedResults.Ok());
         }
     }
 }
