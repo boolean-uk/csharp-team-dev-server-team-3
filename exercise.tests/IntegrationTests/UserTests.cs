@@ -254,11 +254,10 @@ namespace exercise.tests.IntegrationTests
                 Email = "roman.olsen13@.e.com"
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
 
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -274,12 +273,11 @@ namespace exercise.tests.IntegrationTests
                 { "password", "nope!"}
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
 
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
-
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
+            
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -294,11 +292,10 @@ namespace exercise.tests.IntegrationTests
                 { "role", 10}
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
 
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -314,11 +311,10 @@ namespace exercise.tests.IntegrationTests
                 { "username", "nigel-nowak2"}
             };
 
-            var json = JsonSerializer.Serialize(fieldsToUpdate);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
 
             int userId = 13;
-            var response = await _client.PatchAsync($"/users/{userId}", content);
+            var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
