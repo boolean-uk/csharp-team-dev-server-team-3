@@ -6,6 +6,7 @@ using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace exercise.wwwapi.Endpoints
 {
@@ -17,6 +18,7 @@ namespace exercise.wwwapi.Endpoints
             cohorts.MapPost("/", CreateCohort).WithSummary("Create a cohort");
             cohorts.MapGet("/", GetAllCohorts).WithSummary("Get all cohorts");
             cohorts.MapGet("/{id}", GetCohort).WithSummary("Get a cohort by ID");
+            //cohorts.MapGet("/{userId}", GetCohortByUserId).WithSummary("");
             cohorts.MapPost("/{cohortId}/{userId}/{courseId}", AddUserToCohort).WithSummary("Add a user to a cohort");
             cohorts.MapDelete("/{cohortId}/{userId}/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
         }
@@ -73,10 +75,13 @@ namespace exercise.wwwapi.Endpoints
         {
 
             var results = cohortService.GetAllFiltered(c => c.Title == request.Title);
-            if (results != null) return TypedResults.BadRequest(new ResponseDTO<object>
-            {
-                Message = $"Cohort with name {request.Title} already exists"
-            });
+            Console.WriteLine(results);
+            if (results.Any()) 
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"Cohort with name '{request.Title}' already exists",
+                    Data = results
+                });
 
             Cohort cohort = new Cohort() { Title = request.Title };
 
@@ -128,10 +133,11 @@ namespace exercise.wwwapi.Endpoints
         {
             // 1. Get the user
             var user = userService.GetById(userId);
-            if (user == null) return TypedResults.BadRequest(new ResponseDTO<object>
-            {
-                Message = $"User with Id {userId} not found."
-            });
+            if (user == null) 
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"User with Id {userId} not found."
+                });
 
             // 2. Get the cohort including its users and courses for verification steps
             var cohort = cohortService.GetById(cohortId, q =>
@@ -141,10 +147,11 @@ namespace exercise.wwwapi.Endpoints
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
 
-            if (cohort == null) return TypedResults.BadRequest(new ResponseDTO<object>
-            {
-                Message = $"Cohort with Id {cohortId} not found."
-            });
+            if (cohort == null) 
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"Cohort with Id {cohortId} not found."
+                });
 
             // 3. Verify that the course exists in this cohort
             var cohortCourse = cohort.CohortCourses.FirstOrDefault(cc => cc.CourseId == courseId);
@@ -155,11 +162,11 @@ namespace exercise.wwwapi.Endpoints
                 });
 
             // 4. Check if the user is already in this cohort
-            if (cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
-                return TypedResults.BadRequest(new ResponseDTO<object>
-                {
-                    Message = "User is already a member of this cohort."
-                });
+            //if (cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
+            //    return TypedResults.BadRequest(new ResponseDTO<object>
+            //    {
+            //        Message = "User is already a member of this cohort."
+            //    }); 
 
             // 7. Add user to CohortCourseUser
             var existingCcu = cohortCourseUserService
@@ -196,7 +203,7 @@ namespace exercise.wwwapi.Endpoints
             }
             return TypedResults.BadRequest(new ResponseDTO<object>
             {
-                Message = "Failed to add user."
+                Message = "User is already in the specified course in the cohort."
             });
         }
 
@@ -232,6 +239,19 @@ namespace exercise.wwwapi.Endpoints
                 Message = $"Cohort with Id {cohortId} not found."
             });
 
+            var isTrue = false;
+            foreach (var cc in cohort.CohortCourses)
+            {
+                if (cc.CohortCourseUsers.Any(ccu => ccu.UserId == userId)) isTrue = true;     
+            }
+            if (!isTrue)
+                {
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = "The specified user is not part of this cohort."
+                });
+            }
+
             // 3. Verify that the course exists in this cohort
             var cohortCourse = cohort.CohortCourses.FirstOrDefault(cc => cc.CourseId == courseId);
             if (cohortCourse == null)
@@ -241,10 +261,10 @@ namespace exercise.wwwapi.Endpoints
                 });
 
             // 4. Check if the user is already in this cohort
-            if (!cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
+            if (!cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId && cu.CourseId == courseId))
                 return TypedResults.BadRequest(new ResponseDTO<object>
                 {
-                    Message = "User is not a member of this cohort."
+                    Message = "User is in cohort, but is not taking the specified course."
                 });
 
             // 7. Add user to CohortCourseUser

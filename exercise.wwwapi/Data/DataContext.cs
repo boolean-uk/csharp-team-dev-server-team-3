@@ -52,10 +52,6 @@ namespace exercise.wwwapi.Data
                 .HasForeignKey(ccu => ccu.UserId);
             #endregion CohortCourse
 
-            modelBuilder.Entity<UserCohort>()
-                .HasKey(uc => new { uc.UserId, uc.CohortId });
-
-
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)
                 .HasConversion<string>();
@@ -89,6 +85,5 @@ namespace exercise.wwwapi.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<CohortCourse> CohortCourses { get; set; }
         public DbSet<CohortCourseUser> CohortCourseUsers { get; set; }
-        public DbSet<UserCohort> UserCohorts { get; set; }
     }
 }

@@ -33,9 +33,6 @@ namespace workshop.wwwapi.Tools
                         .Where(ccu => ccu.User.Role == Roles.teacher)
                         .Select(ccu => ccu.User)));
 
-            CreateMap<UserCohort, UserCohortDTO>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
-
             CreateMap<PostComment, PostCommentDTO>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
 
