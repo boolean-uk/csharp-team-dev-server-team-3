@@ -33,14 +33,20 @@ namespace exercise.tests.IntegrationTests
             _factory.Dispose();
         }
 
-        private const string TeacherEmail = "will.devries7@example.com"; // has post id 21 and comment id 23
+        private const string TeacherEmail = "anna.gruber160@example.com"; // has post id 34,35 and comment id 37
         private const string TeacherPassword = "Neidintulling!l33t";
+        private const int TeacherPostID = 34;
+        private const int TeacherCommentID = 37;
 
-        private const string StudentEmail1 = "noa.gronningen47@example.com"; // has post id 32 and comment id 37
-        private const string StudentPassword1 = "lettPassord123!";
+        private const string StudentEmail1 = "jan.larsen9@example.com"; //id 232, has post id 57, 58 and comment id 2
+        private const string StudentPassword1 = "SuperHash!4";
+        private const int StudentPostID1 = 57;
+        private const int StudentCommentID1 = 2;
 
-        private const string StudentEmail2 = "anna.gruber160@example.com"; // has post id 32 and commeent id 29
+        private const string StudentEmail2 = "timian.saar85@example.com"; //id 85, has post id 36 and comment id 3
         private const string StudentPassword2 = "Neidintulling!l33t";
+        private const int StudentPostID2 = 36;
+        private const int StudentCommentID2 = 3;
 
         private async Task<string> LoginAndGetToken(string email, string password, bool success = true)
         {
@@ -294,16 +300,16 @@ namespace exercise.tests.IntegrationTests
 
 
 
-        [TestCase(TeacherEmail, TeacherPassword, 21, "Teacher updated own post", HttpStatusCode.OK)]          // Teacher edit their own post
-        [TestCase(TeacherEmail, TeacherPassword, 34, "Teacher updated student’s post", HttpStatusCode.OK)]    // Teacher edits someone else’s post
-        [TestCase(StudentEmail1, StudentPassword1, 34, "Student1 updated own post", HttpStatusCode.OK)]        // Student1 edits their own post
-        [TestCase(StudentEmail1, StudentPassword1, 40, "Student1 tried updating Student2’s post", HttpStatusCode.Forbidden)]        // Student1 tries to edit Student2’s post
-        [TestCase(StudentEmail2, StudentPassword2, 32, "Student2 updated own post", HttpStatusCode.OK)]        // Student2 edits their own post
-        [TestCase(StudentEmail2, StudentPassword2, 21, "Student2 tried updating Teacher’s post", HttpStatusCode.Forbidden)]   // Student2 tries to edit Teacher’s post
-        [TestCase(StudentEmail1, "Wrong!1", 30, "Invalid login attempt", HttpStatusCode.Unauthorized)]   // Unauthenticated user (wrong password)     
+        [TestCase(TeacherEmail, TeacherPassword, TeacherPostID, "Teacher updated own post", HttpStatusCode.OK)]          // Teacher edit their own post
+        [TestCase(TeacherEmail, TeacherPassword, StudentPostID1, "Teacher updated student’s post", HttpStatusCode.OK)]    // Teacher edits someone else’s post
+        [TestCase(StudentEmail1, StudentPassword1, StudentPostID1, "Student1 updated own post", HttpStatusCode.OK)]        // Student1 edits their own post
+        [TestCase(StudentEmail1, StudentPassword1, StudentPostID2, "Student1 tried updating Student2’s post", HttpStatusCode.Forbidden)]        // Student1 tries to edit Student2’s post
+        [TestCase(StudentEmail2, StudentPassword2, StudentPostID2, "Student2 updated own post", HttpStatusCode.OK)]        // Student2 edits their own post
+        [TestCase(StudentEmail2, StudentPassword2, TeacherPostID, "Student2 tried updating Teacher’s post", HttpStatusCode.Forbidden)]   // Student2 tries to edit Teacher’s post
+        [TestCase(StudentEmail1, "Wrong!1", StudentPostID1, "Invalid login attempt", HttpStatusCode.Unauthorized)]   // Unauthenticated user (wrong password)     
         [TestCase(TeacherEmail, TeacherPassword, 999999, "Does not exist", HttpStatusCode.NotFound)]// Post does not exist
-        [TestCase(TeacherEmail, TeacherPassword, 21, "", HttpStatusCode.BadRequest)]   // Invalid content (empty string)
-        [TestCase(StudentEmail1, StudentPassword1, 34, "", HttpStatusCode.BadRequest)] // Invalid content (empty string)
+        [TestCase(TeacherEmail, TeacherPassword, TeacherPostID, "", HttpStatusCode.BadRequest)]   // Invalid content (empty string)
+        [TestCase(StudentEmail1, StudentPassword1, StudentPostID2, "", HttpStatusCode.BadRequest)] // Invalid content (empty string)
         public async Task UpdatePostById(string userEmail, string password, int postId, string newContent, HttpStatusCode expected)
         {
 
