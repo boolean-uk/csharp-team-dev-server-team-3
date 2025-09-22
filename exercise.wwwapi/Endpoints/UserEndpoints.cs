@@ -20,23 +20,49 @@ namespace exercise.wwwapi.EndPoints
     {
         public static void ConfigureAuthApi(this WebApplication app)
         {
+            app.MapPost("/login", Login).WithSummary("Localhost Login");
+            
             var users = app.MapGroup("users");
             users.MapPost("/", Register).WithSummary("Create user");
             users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
-            users.MapGet("/{id}", GetUserById).WithSummary("Get user by user id");
-            users.MapPatch("/{id}", UpdateUser).WithSummary("Update a user");
-            app.MapPost("/login", Login).WithSummary("Localhost Login");
+            users.MapGet("/{id:int}", GetUserById).WithSummary("Get user by user id");
+            users.MapPatch("/{id:int}", UpdateUser).WithSummary("Update a user");
         }
+        
+        /// <summary>
+        /// Retrieves users, optionally filtered by a case-insensitive search on first name, last name, or full name.
+        /// </summary>
+        /// <param name="repository">
+        /// The user repository used to fetch users.
+        /// </param>
+        /// <param name="claims">
+        /// <see cref="ClaimsPrincipal"/>-user that authorizes the user to use this endpoint.
+        /// </param>
+        /// <param name="name">
+        /// Optional search term to filter users by first name, last name, or "FirstName LastName".
+        /// </param>
+        /// <returns>
+        /// <see cref="IResult"/> with a 200 OK containing a <see cref="ResponseDTO{T}"/> of <see cref="UsersSuccessDTO"/> on success,
+        /// or a 401 Unauthorized if the caller is not authorized.
+        /// </returns>
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        private static async Task<IResult> GetUsers(IRepository<User> service, string? name, ClaimsPrincipal user)
+        private static async Task<IResult> GetUsers(IRepository<User> repository, ClaimsPrincipal claims, string? name)
         {
-            IEnumerable<User> results = await service.Get();
+            int? id  = claims.UserRealId();
+            if (id == null)
+            {
+                return TypedResults.Ok(new ResponseDTO<object>()
+                    { Message = "Invalid token" });
+            }
+
+            IEnumerable<User> results = await repository.Get();
             string? search = name?.Trim().ToLower();
+            
             UsersSuccessDTO userData = new UsersSuccessDTO()
             {
-                Users = !string.IsNullOrWhiteSpace(name)
+                Users = !string.IsNullOrWhiteSpace(search)
                     ? results.Where(i =>
                         (i.FirstName.ToLower().Contains(search)) ||
                         (i.LastName.ToLower().Contains(search)) ||
@@ -44,42 +70,41 @@ namespace exercise.wwwapi.EndPoints
                     ).ToList()
                     : results.ToList()
             };
+            
             ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>()
             {
                 Message = "success",
                 Data = userData
             };
+            
             return TypedResults.Ok(response);
         }
-
+        
+        // TODO: Docstring
+        // Public endpoint, not authorized
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        private static IResult Register(RegisterRequestDTO request, IRepository<User> service, IMapper mapper)
+        private static IResult Register(IRepository<User> repository, IMapper mapper, RegisterRequestDTO request)
         {
-
-            // syntax checks
-            // check valid password
+            // Validate password
             string validationResult = Validator.Password(request.password);
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = validationResult });
-            // check valid email
+            
+            // Validate email
             string emailValidation = Validator.Email(request.email);
             if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = emailValidation });
-
-            // check if email is in database
-            var emailExists = service.GetAllFiltered(q => q.Email == request.email);
+            var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
             if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<string>() { Message = "Fail" });
-
-
-            string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.password);
-
-            var user = new User();
-
-            user.PasswordHash = passwordHash;
-            user.Email = request.email;
-
-            service.Insert(user);
-            service.Save();
+            
+            // Put user
+            var user = new User
+            {
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.password),
+                Email = request.email
+            };
+            repository.Insert(user);
+            repository.Save();
 
             ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
             {
@@ -89,11 +114,12 @@ namespace exercise.wwwapi.EndPoints
 
             return Results.Created($"/users/{user.Id}", response);
         }
-
+        
+        // TODO: Docstring
+        // Public endpoint (not authorized)
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        private static IResult Login(LoginRequestDTO request, IRepository<User> service, IConfigurationSettings config, IMapper mapper)
+        private static IResult Login(IRepository<User> repository, IMapper mapper, LoginRequestDTO request, IConfigurationSettings config)
         {
             //if (string.IsNullOrEmpty(request.username)) request.username = request.email;
 
@@ -107,12 +133,10 @@ namespace exercise.wwwapi.EndPoints
 
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
-            var emailExists = service.GetAllFiltered(q => q.Email == request.email);
+            var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
             if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
-
-
-
-            User user = service.GetAll().FirstOrDefault(u => u.Email == request.email)!;
+            
+            User user = repository.GetAll().FirstOrDefault(u => u.Email == request.email)!;
 
 
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
@@ -137,11 +161,14 @@ namespace exercise.wwwapi.EndPoints
             return Results.Ok(response);
 
         }
+        
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> GetUserById(IRepository<User> service, int id, IMapper mapper)
+        private static async Task<IResult> GetUserById(IRepository<User> repository, ClaimsPrincipal claims, IMapper mapper, int id)
         {
-            var user = service.GetById(id);
+            var user = repository.GetById(id);
             if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
 
             ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
@@ -152,11 +179,13 @@ namespace exercise.wwwapi.EndPoints
 
             return TypedResults.Ok(response);
         }
-
+        
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public static async Task<IResult> UpdateUser(IRepository<User> repository, int id, UserPatchDTO userPatch, IMapper mapper)
+        private static async Task<IResult> UpdateUser(IRepository<User> repository, ClaimsPrincipal claims, IMapper mapper, int id, UserPatchDTO userPatch)
         {
             if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null))
                 return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Provide at least one field for update" });
@@ -164,6 +193,15 @@ namespace exercise.wwwapi.EndPoints
             var user = repository.GetById(id);
 
             if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
+            
+            if (user.Id != claims.UserRealId() && claims.Role() == (int)Roles.student)
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to edit this post."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
 
             if (userPatch.Username != null && userPatch.Username != user.Username)
             {
@@ -229,16 +267,18 @@ namespace exercise.wwwapi.EndPoints
 
             return TypedResults.Ok(response);
         }
+        
+        // Helper, creates jwt tokens
         private static string CreateToken(User user, IConfigurationSettings config)
         {
-            List<Claim> claims = new List<Claim>
-            {
+            List<Claim> claims =
+            [
                 new Claim(ClaimTypes.Sid, user.Id.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, ((int)user.Role).ToString())
-            };
+            ];
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetValue("AppSettings:Token")));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);

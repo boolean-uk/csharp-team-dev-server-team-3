@@ -23,7 +23,7 @@ namespace exercise.wwwapi.Endpoints
         /// Source: https://docs.github.com/en/enterprise-cloud@latest/admin/managing-iam/iam-configuration-reference/username-considerations-for-external-authentication
         /// </summary>
         /// <param name="repository"> A <see cref="IRepository{User}"/> object used to query the user data source for existing GitHub usernames.</param>
-        /// <param name="gitUsername">The username string to validate.</param>
+        /// <param name="username">The username string to validate.</param>
         /// <returns>
         /// 200 OK response with a message if the username is accepted.<br/>
         /// 400 Bad Request with a message if the username is invalid or if username already exists in database.
@@ -34,11 +34,12 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateGitUsername(IRepository<User> repository, [FromQuery] string username)
         {
-            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
             string result = Helpers.Validator.Username(username);
             if (result != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
+            
             var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUsername == username);
             if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "GitHub username is already in use" });
+            
             return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
 
@@ -57,18 +58,19 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateEmail(IRepository<User> repository, string email)
         {
-            if (email == null || string.IsNullOrEmpty(email)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
             string result = Helpers.Validator.Email(email);
             if (result != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
+            
             var emailExists = repository.GetAllFiltered(q => q.Email == email);
             if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Email already exists" });
+            
             return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
 
         /// <summary>
         /// Validates a password using custom password rules.
         /// </summary>
-        /// <param name="password">A <see cref="PasswordDTO"/> object containing the password to validate.</param>
+        /// <param name="passwordDto">A <see cref="passwordDto"/> object containing the password to validate.</param>
         /// <returns>
         /// 200 OK response if the password is accepted.<br/>
         /// 400 Bad Request with a message if the password is invalid or if validation fails. 
@@ -77,14 +79,14 @@ namespace exercise.wwwapi.Endpoints
         /// <response code="400">Password is invalid or validation failed.</response>
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        private static IResult ValidatePassword(PasswordDTO passwordDTO)
+        private static IResult ValidatePassword(PasswordDTO? passwordDto)
         {
-            if (passwordDTO == null || string.IsNullOrEmpty(passwordDTO.password))
-                return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
-            string result = Helpers.Validator.Password(passwordDTO.password);
-            if (result == null) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
-            else if (result == "Accepted") return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
-            else return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
+            if (passwordDto == null || string.IsNullOrEmpty(passwordDto.password)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Something went wrong!" });
+            
+            string result = Helpers.Validator.Password(passwordDto.password);
+            if (result == "Accepted") return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
+            
+            return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
         }
 
         /// <summary>
@@ -104,11 +106,12 @@ namespace exercise.wwwapi.Endpoints
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         private static IResult ValidateUsername(IRepository<User> repository, [FromQuery] string username)
         {
-            if (username == null || string.IsNullOrEmpty(username)) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Empty input" });
             string result = Helpers.Validator.Username(username);
             if (result != "Accepted") return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = result });
+            
             var usernameExists = repository.GetAllFiltered(q => q.Username == username);
             if (usernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<Object>() { Message = "Username is already in use" });
+            
             return TypedResults.Ok(new ResponseDTO<Object>() { Message = result });
         }
     }
