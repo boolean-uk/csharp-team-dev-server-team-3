@@ -50,7 +50,6 @@ namespace exercise.wwwapi.Data
                 .HasOne(ccu => ccu.User)
                 .WithMany(u => u.CohortCourseUsers)  // ← Specify the inverse navigation
                 .HasForeignKey(ccu => ccu.UserId);
-
             #endregion CohortCourse
 
             modelBuilder.Entity<UserCohort>()
