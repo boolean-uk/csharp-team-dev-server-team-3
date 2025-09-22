@@ -10,52 +10,25 @@ namespace exercise.tests.IntegrationTests
     /// Integration smoke tests that ensure unexpected endpoints return consistent error responses.
     /// </summary>
     [TestFixture]
-    public class EndpointStatusTest
+    public class EndpointStatusTest : BaseIntegrationTest
     {
-        private WebApplicationFactory<Program> _factory;
-        private HttpClient _client;
-
-        [SetUp]
-        public void SetUp()
-        {
-            // Arrange 
-            _factory = new WebApplicationFactory<Program>();
-            _client = _factory.CreateClient();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _client.Dispose();
-            _factory.Dispose();
-        }
-
         /// <summary>
         /// Verifies POST requests to unknown routes return a 404 with the canonical payload.
         /// </summary>
         [Test]
         public async Task PostCheckInvalidEndpoint()
         {
+
             var body = new
             {
-                email = $"myemailVery@gmail.com",
-                password = "someR21!password"
+                email = TeacherEmail,
+                password = TeacherPassword
             };
-            var json = JsonSerializer.Serialize(body);
-            var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
-            // Act
-            var response = await _client.PostAsync("/okokoNONEVER", requestBody);
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
+            HttpResponseMessage response = await SendAuthenticatedPostAsync("/NOthisWouldNEVERHAPPENItskindaweird", token, body);
 
-            var contentString = await response.Content.ReadAsStringAsync();
-
-            JsonNode? message = null;
-            if (!string.IsNullOrWhiteSpace(contentString))
-            {
-                message = JsonNode.Parse(contentString);
-            }
-
-            var messageText = message?["message"]?.GetValue<string>();
+            var message = await response.ReadJsonAsync();
 
             Console.WriteLine("Message: " + message);
             // Assert
@@ -69,19 +42,13 @@ namespace exercise.tests.IntegrationTests
         [Test]
         public async Task GetCheckInvalidEndpoint()
         {
-
+            string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
             // Act
-            var response = await _client.GetAsync("/okokoNONEVER");
+            HttpResponseMessage response = await SendAuthenticatedGetAsync("/NOthisWouldNEVERHAPPENItskindaweird", token);
 
-            var contentString = await response.Content.ReadAsStringAsync();
 
-            JsonNode? message = null;
-            if (!string.IsNullOrWhiteSpace(contentString))
-            {
-                message = JsonNode.Parse(contentString);
-            }
+            var message = await response.ReadJsonAsync();
 
-            var messageText = message?["message"]?.GetValue<string>();
 
             Console.WriteLine("Message: " + message);
             // Assert
