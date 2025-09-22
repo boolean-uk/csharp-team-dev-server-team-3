@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.Cohort;
+using exercise.wwwapi.DTOs.Posts;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Mvc;
@@ -28,9 +30,16 @@ namespace exercise.wwwapi.Endpoints
                 .Include(c => c.CohortCourses)
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
-            CohortDTO cohortDTOs = mapper.Map<CohortDTO>(result);
+            CohortDTO cohortDTO = mapper.Map<CohortDTO>(result);
+            ResponseDTO<CohortDTO> response = new ResponseDTO<CohortDTO>()
+            {
+                Message = "Success",
+                Data = cohortDTO
+            };
 
-            return TypedResults.Ok(cohortDTOs);
+            return TypedResults.Ok(response);
+
+            //return TypedResults.Ok(cohortDTOs);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -46,8 +55,13 @@ namespace exercise.wwwapi.Endpoints
             Console.WriteLine(results);
 
             IEnumerable<CohortDTO> cohortDTOs = mapper.Map<IEnumerable<CohortDTO>>(results);
+            ResponseDTO<IEnumerable<CohortDTO>> response = new ResponseDTO<IEnumerable<CohortDTO>>()
+            {
+                Message = "Success",
+                Data = cohortDTOs
+            };
 
-            return TypedResults.Ok(cohortDTOs);
+            return TypedResults.Ok(response);
         }
 
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -57,6 +71,13 @@ namespace exercise.wwwapi.Endpoints
             IMapper mapper,
             CreateCohortDTO request)
         {
+
+            var results = cohortService.GetAllFiltered(c => c.Title == request.Title);
+            if (results != null) return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = $"Cohort with name {request.Title} already exists"
+            });
+
             Cohort cohort = new Cohort() { Title = request.Title };
 
             string[] defaultCourses = { "Software Development", "Front-End Development", "Data Analytics" };
@@ -84,7 +105,12 @@ namespace exercise.wwwapi.Endpoints
             cohortService.Insert(cohort);
             cohortService.Save();
 
-            var response = mapper.Map<CohortDTO>(cohort);
+            var cohortDTO = mapper.Map<CohortDTO>(cohort);
+            ResponseDTO<CohortDTO> response = new ResponseDTO<CohortDTO>()
+            {
+                Message = "Success",
+                Data = cohortDTO
+            };
             return TypedResults.Created($"/api/cohorts/{cohort.Id}", response);
         }
 
@@ -102,7 +128,10 @@ namespace exercise.wwwapi.Endpoints
         {
             // 1. Get the user
             var user = userService.GetById(userId);
-            if (user == null) return Results.NotFound($"User with Id {userId} not found.");
+            if (user == null) return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = $"User with Id {userId} not found."
+            });
 
             // 2. Get the cohort including its users and courses for verification steps
             var cohort = cohortService.GetById(cohortId, q =>
@@ -112,16 +141,25 @@ namespace exercise.wwwapi.Endpoints
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
 
-            if (cohort == null) return Results.NotFound($"Cohort with Id {cohortId} not found.");
+            if (cohort == null) return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = $"Cohort with Id {cohortId} not found."
+            });
 
             // 3. Verify that the course exists in this cohort
             var cohortCourse = cohort.CohortCourses.FirstOrDefault(cc => cc.CourseId == courseId);
             if (cohortCourse == null)
-                return Results.BadRequest("The specified course is not part of this cohort.");
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = "The specified course is not part of this cohort."
+                });
 
             // 4. Check if the user is already in this cohort
             if (cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
-                return Results.BadRequest("User is already a member of this cohort.");
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = "User is already a member of this cohort."
+                });
 
             // 7. Add user to CohortCourseUser
             var existingCcu = cohortCourseUserService
@@ -147,10 +185,19 @@ namespace exercise.wwwapi.Endpoints
                 cohortCourseUserService.Save();
 
                 // 9. Map response
-                var response = mapper.Map<CohortCourseUserDTO>(ccu);
+                var ccuDTO = mapper.Map<CohortCourseUserDTO>(ccu);
+                ResponseDTO<CohortCourseUserDTO> response = new ResponseDTO<CohortCourseUserDTO>()
+                {
+                    Message = "Success",
+                    Data = ccuDTO
+                };
+
                 return TypedResults.Ok(response);
             }
-            return TypedResults.BadRequest();
+            return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = "Failed to add user."
+            });
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -167,7 +214,10 @@ namespace exercise.wwwapi.Endpoints
         {
             // 1. Get the user
             var user = userService.GetById(userId);
-            if (user == null) return Results.NotFound($"User with Id {userId} not found.");
+            if (user == null) return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = $"User with Id {userId} not found."
+            });
 
             // 2. Get the cohort including its users and courses for verification steps
             var cohort = cohortService.GetById(cohortId, q =>
@@ -177,16 +227,25 @@ namespace exercise.wwwapi.Endpoints
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
 
-            if (cohort == null) return Results.NotFound($"Cohort with Id {cohortId} not found.");
+            if (cohort == null) return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = $"Cohort with Id {cohortId} not found."
+            });
 
             // 3. Verify that the course exists in this cohort
             var cohortCourse = cohort.CohortCourses.FirstOrDefault(cc => cc.CourseId == courseId);
             if (cohortCourse == null)
-                return Results.BadRequest("The specified course is not part of this cohort.");
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = "The specified course is not part of this cohort."
+                });
 
             // 4. Check if the user is already in this cohort
             if (!cohortCourse.CohortCourseUsers.Any(cu => cu.UserId == userId))
-                return Results.BadRequest("User is not a member of this cohort.");
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = "User is not a member of this cohort."
+                });
 
             // 7. Add user to CohortCourseUser
             var existingCcu = cohortCourseUserService
@@ -212,10 +271,19 @@ namespace exercise.wwwapi.Endpoints
                 cohortCourseUserService.Save();
 
                 // 9. Map response
-                var response = mapper.Map<CohortCourseUserDTO>(existingCcu);
+                var ccuDTO = mapper.Map<CohortCourseUserDTO>(existingCcu);
+                ResponseDTO<CohortCourseUserDTO> response = new ResponseDTO<CohortCourseUserDTO>()
+                {
+                    Message = "Success",
+                    Data = ccuDTO
+                };
+
                 return TypedResults.Ok(response);
             }
-            return TypedResults.BadRequest();
+            return TypedResults.BadRequest(new ResponseDTO<object>
+            {
+                Message = "Failed to delete user."
+            });
 
         }
     }
