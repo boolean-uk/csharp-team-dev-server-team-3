@@ -18,10 +18,10 @@ namespace exercise.wwwapi.Endpoints
             var cohorts = app.MapGroup("cohorts");
             cohorts.MapPost("/", CreateCohort).WithSummary("Create a cohort");
             cohorts.MapGet("/", GetAllCohorts).WithSummary("Get all cohorts");
-            cohorts.MapGet("/cohortId/{id}", GetCohort).WithSummary("Get a cohort by ID");
+            cohorts.MapGet("/cohortId/{cohortId}", GetCohort).WithSummary("Get a cohort by ID");
             cohorts.MapGet("/userId/{userId}", GetCohortByUserId).WithSummary("Get all cohorts a user is in by its Id");
-            cohorts.MapPost("/{cohortId}/{userId}/{courseId}", AddUserToCohort).WithSummary("Add a user to a cohort");
-            cohorts.MapDelete("/{cohortId}/{userId}/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
+            cohorts.MapPost("/cohortId/{cohortId}/userId/{userId}/courseId/{courseId}", AddUserToCohort).WithSummary("Add a user to a cohort");
+            cohorts.MapDelete("/cohortId/{cohortId}/userId/{userId}/courseId/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
         }
 
         [Authorize]
