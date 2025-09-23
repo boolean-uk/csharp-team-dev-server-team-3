@@ -23,6 +23,7 @@ namespace workshop.wwwapi.Tools
                 .ForMember(dest => dest.Cohort, opt => opt.MapFrom(src => src.Cohort.Title));
 
             CreateMap<CohortCourse, CourseInCohortDTO>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.CourseId))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Course.Title))
                 .ForMember(dest => dest.Students, opt => opt.MapFrom(
                     src => src.CohortCourseUsers
