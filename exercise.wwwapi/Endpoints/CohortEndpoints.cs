@@ -4,6 +4,7 @@ using exercise.wwwapi.DTOs.Cohort;
 using exercise.wwwapi.DTOs.Posts;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -23,6 +24,8 @@ namespace exercise.wwwapi.Endpoints
             cohorts.MapDelete("/{cohortId}/{userId}/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
         }
 
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> GetCohort(IRepository<Cohort> service, IMapper mapper, int cohortId)
         {
@@ -52,7 +55,8 @@ namespace exercise.wwwapi.Endpoints
             //return TypedResults.Ok(cohortDTOs);
         }
 
-
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> GetCohortByUserId(IRepository<Cohort> cohortRepo, IMapper mapper, int userId) 
         {
@@ -81,6 +85,7 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(response);
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper)
         {
@@ -102,6 +107,8 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(response);
         }
 
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public static async Task<IResult> CreateCohort(
             IRepository<Cohort> cohortService,
@@ -155,6 +162,7 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Created($"/api/cohorts/{cohort.Id}", response);
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> AddUserToCohort(
@@ -243,6 +251,7 @@ namespace exercise.wwwapi.Endpoints
             });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> DeleteUserFromCohort(
