@@ -2,12 +2,14 @@
 using exercise.wwwapi.DTOs;
 using exercise.wwwapi.DTOs.Cohort;
 using exercise.wwwapi.DTOs.Posts;
+using exercise.wwwapi.Helpers;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Claims;
 
 namespace exercise.wwwapi.Endpoints
 {
@@ -86,9 +88,19 @@ namespace exercise.wwwapi.Endpoints
         }
 
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper)
+        public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper, ClaimsPrincipal user)
         {
+            if (user.Role() != (int)Roles.teacher)
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to get all cohorts."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
+
             var results = cohortService.GetWithIncludes(q => q
                 .Include(c => c.CohortCourses)
                     .ThenInclude(cc => cc.Course)
@@ -108,14 +120,24 @@ namespace exercise.wwwapi.Endpoints
         }
 
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public static async Task<IResult> CreateCohort(
             IRepository<Cohort> cohortService,
             IRepository<Course> courseService,
+            ClaimsPrincipal user,
             IMapper mapper,
             CreateCohortDTO request)
         {
+            if (user.Role() != (int)Roles.teacher)
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to create a new cohort."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
 
             var results = cohortService.GetAllFiltered(c => c.Title == request.Title);
             Console.WriteLine(results);
@@ -164,6 +186,7 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> AddUserToCohort(
                     IRepository<Cohort> cohortService,
@@ -171,10 +194,20 @@ namespace exercise.wwwapi.Endpoints
                     IRepository<CohortCourse> cohortCourseService,
                     IRepository<CohortCourseUser> cohortCourseUserService,
                     IMapper mapper,
+                    ClaimsPrincipal userCheck,
                     int userId,
                     int cohortId,
                     int courseId)
         {
+            if (userCheck.Role() != (int)Roles.teacher)
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to add a user to a cohort."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
+
             // 1. Get the user
             var user = userService.GetById(userId);
             if (user == null) 
@@ -253,6 +286,7 @@ namespace exercise.wwwapi.Endpoints
 
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> DeleteUserFromCohort(
                 IRepository<Cohort> cohortService,
@@ -260,10 +294,21 @@ namespace exercise.wwwapi.Endpoints
                 IRepository<CohortCourse> cohortCourseService,
                 IRepository<CohortCourseUser> cohortCourseUserService,
                 IMapper mapper,
+                ClaimsPrincipal userCheck,
                 int userId,
                 int cohortId,
                 int courseId)
         {
+
+            if (userCheck.Role() != (int)Roles.teacher)
+            {
+                var forbiddenResponse = new ResponseDTO<object>
+                {
+                    Message = "You are not authorized to delete a user from a cohort."
+                };
+                return TypedResults.Json(forbiddenResponse, statusCode: StatusCodes.Status403Forbidden);
+            }
+
             // 1. Get the user
             var user = userService.GetById(userId);
             if (user == null) return TypedResults.BadRequest(new ResponseDTO<object>
