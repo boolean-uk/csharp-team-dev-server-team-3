@@ -47,9 +47,7 @@ namespace exercise.wwwapi.Endpoints
             CreatePostDTO request
             )
         {
-            int? userid = user.UserRealId();
-            if ( userid == null ) return Results.NotFound(new ResponseDTO<Object> { Message = "UserId missing" });
-            User? dbUser = userservice.GetById(userid);
+            User? dbUser = userservice.GetById(user.UserRealId());
             if (dbUser == null) return Results.NotFound(new ResponseDTO<Object> { Message = "Invalid userID" });
 
             if (string.IsNullOrWhiteSpace(request.Content))
