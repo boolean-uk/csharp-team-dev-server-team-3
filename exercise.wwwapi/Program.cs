@@ -1,3 +1,5 @@
+using exercise.wwwapi.Authorization;
+using exercise.wwwapi.Authorization.Extensions;
 using exercise.wwwapi.Configuration;
 using exercise.wwwapi.Data;
 using exercise.wwwapi.Endpoints;
@@ -5,6 +7,7 @@ using exercise.wwwapi.EndPoints;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -28,10 +31,11 @@ builder.Services.AddScoped<IRepository<CohortCourse>, Repository<CohortCourse>>(
 builder.Services.AddScoped<IRepository<CohortCourseUser>, Repository<CohortCourseUser>>();
 builder.Services.AddScoped<ILogger, Logger<string>>();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationResultHandler>();
+
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
-
     //options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
     options.UseNpgsql(builder.Configuration.GetConnectionString("LocalDatabase"));
     options.LogTo(message => Debug.WriteLine(message));
@@ -91,7 +95,9 @@ builder.Services.AddSwaggerGen(s =>
             });
 
 });
-builder.Services.AddAuthorization();
+//builder.Services.AddAuthorization();
+builder.Services.AddCustomAuthorization();
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -123,6 +129,8 @@ app.UseCors(x => x
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+
+
 
 app.UseAuthorization();
 
