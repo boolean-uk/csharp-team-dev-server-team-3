@@ -4,6 +4,7 @@ using exercise.wwwapi.DTOs.Cohort;
 using exercise.wwwapi.DTOs.Posts;
 using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -18,11 +19,13 @@ namespace exercise.wwwapi.Endpoints
             cohorts.MapPost("/", CreateCohort).WithSummary("Create a cohort");
             cohorts.MapGet("/", GetAllCohorts).WithSummary("Get all cohorts");
             cohorts.MapGet("/cohortId/{cohortId}", GetCohort).WithSummary("Get a cohort by ID");
-            //cohorts.MapGet("/{userId}", GetCohortByUserId).WithSummary("");
+            cohorts.MapGet("/userId/{userId}", GetCohortByUserId).WithSummary("Get all cohorts a user is in by its Id");
             cohorts.MapPost("/cohortId/{cohortId}/userId/{userId}/courseId/{courseId}", AddUserToCohort).WithSummary("Add a user to a cohort");
             cohorts.MapDelete("/cohortId/{cohortId}/userId/{userId}/courseId/{courseId}", DeleteUserFromCohort).WithSummary("Delete a user from a cohort");
         }
 
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public static async Task<IResult> GetCohort(IRepository<Cohort> service, IMapper mapper, int cohortId)
         {
@@ -32,6 +35,14 @@ namespace exercise.wwwapi.Endpoints
                 .Include(c => c.CohortCourses)
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
+
+            if (result == null)
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"Cohort with id '{cohortId}' does not exists",
+                    Data = result
+                });
+
             CohortDTO cohortDTO = mapper.Map<CohortDTO>(result);
             ResponseDTO<CohortDTO> response = new ResponseDTO<CohortDTO>()
             {
@@ -44,17 +55,25 @@ namespace exercise.wwwapi.Endpoints
             //return TypedResults.Ok(cohortDTOs);
         }
 
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper)
+        public static async Task<IResult> GetCohortByUserId(IRepository<Cohort> cohortRepo, IMapper mapper, int userId) 
         {
-            var results = cohortService.GetWithIncludes(q => q
+            var results = cohortRepo.GetWithIncludes(q => q
                 .Include(c => c.CohortCourses)
                     .ThenInclude(cc => cc.Course)
                 .Include(c => c.CohortCourses)
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User)
-            );
-            Console.WriteLine(results);
+            ).Where(r => r.CohortCourses.Any(cc => cc.CohortCourseUsers.Any(ccu => ccu.UserId == userId)));
+
+            if (!results.Any())
+                return TypedResults.BadRequest(new ResponseDTO<object>
+                {
+                    Message = $"User with id {userId} either does not exist, or is not registered in any cohorts",
+                    Data = results
+                });
 
             IEnumerable<CohortDTO> cohortDTOs = mapper.Map<IEnumerable<CohortDTO>>(results);
             ResponseDTO<IEnumerable<CohortDTO>> response = new ResponseDTO<IEnumerable<CohortDTO>>()
@@ -66,6 +85,30 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Ok(response);
         }
 
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public static async Task<IResult> GetAllCohorts(IRepository<Cohort> cohortService, IMapper mapper)
+        {
+            var results = cohortService.GetWithIncludes(q => q
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.Course)
+                .Include(c => c.CohortCourses)
+                    .ThenInclude(cc => cc.CohortCourseUsers)
+                        .ThenInclude(ccu => ccu.User)
+            );
+
+            IEnumerable<CohortDTO> cohortDTOs = mapper.Map<IEnumerable<CohortDTO>>(results);
+            ResponseDTO<IEnumerable<CohortDTO>> response = new ResponseDTO<IEnumerable<CohortDTO>>()
+            {
+                Message = "Success",
+                Data = cohortDTOs
+            };
+
+            return TypedResults.Ok(response);
+        }
+
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         public static async Task<IResult> CreateCohort(
             IRepository<Cohort> cohortService,
@@ -119,6 +162,7 @@ namespace exercise.wwwapi.Endpoints
             return TypedResults.Created($"/api/cohorts/{cohort.Id}", response);
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> AddUserToCohort(
@@ -207,6 +251,7 @@ namespace exercise.wwwapi.Endpoints
             });
         }
 
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public static async Task<IResult> DeleteUserFromCohort(
