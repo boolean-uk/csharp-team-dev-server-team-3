@@ -12,9 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		IntegrationTestTemplate.txt = IntegrationTestTemplate.txt
 		README.md = README.md
 		UnitTestTemplate.txt = UnitTestTemplate.txt
+		coverlet.runsettings = coverlet.runsettings
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "exercise.tests", "exercise.tests\exercise.tests.csproj", "{693E9261-FBC0-4112-95AF-2492AB6F1DE9}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Diagrams_and_other_cool_stuff", "Diagrams_and_other_cool_stuff", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\Downloads\teamdevsim_v2.drawio = ..\..\..\..\Downloads\teamdevsim_v2.drawio

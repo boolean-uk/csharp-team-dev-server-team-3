@@ -421,6 +421,8 @@ autom4te.cache/
 *.tar.gz
 tarballs/
 test-results/
+coverage/
+coveragereport/
 
 # Mac bundle stuff
 *.dmg
