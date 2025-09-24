@@ -144,9 +144,9 @@ namespace exercise.wwwapi.EndPoints
 
             string token;
 
-            token = CreateToken(user, config);
-            //if (request.longlifetoken.GetValueOrDefault()) token = CreateToken(user, config, 7); 
-            //else token = CreateToken(user, config, );
+            //token = CreateToken(user, config);
+            if (request.longlifetoken.GetValueOrDefault()) token = CreateToken(user, config, 7);
+            else token = CreateToken(user, config, 0.0416666666666666666666666666666666666667);
 
 
             ResponseDTO <LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
@@ -271,7 +271,7 @@ namespace exercise.wwwapi.EndPoints
         }
         
         // Helper, creates jwt tokens
-        private static string CreateToken(User user, IConfigurationSettings config)
+        private static string CreateToken(User user, IConfigurationSettings config, double days)
         {
             List<Claim> claims =
             [
@@ -286,7 +286,7 @@ namespace exercise.wwwapi.EndPoints
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddDays(days),
                 signingCredentials: credentials
                 );
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
