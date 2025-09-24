@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace exercise.wwwapi.EndPoints
 {
@@ -21,14 +22,25 @@ namespace exercise.wwwapi.EndPoints
         public static void ConfigureAuthApi(this WebApplication app)
         {
             app.MapPost("/login", Login).WithSummary("Localhost Login");
+            app.MapGet("/me", Me).WithSummary("Return user associated with token");
             
             var users = app.MapGroup("users");
             users.MapPost("/", Register).WithSummary("Create user");
             users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
             users.MapGet("/{id:int}", GetUserById).WithSummary("Get user by user id");
             users.MapPatch("/{id:int}", UpdateUser).WithSummary("Update a user");
+
         }
-        
+
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        private static IResult Me(IRepository<User> repository, IMapper mapper, ClaimsPrincipal claims)
+        {
+            int? id = claims.UserRealId();
+            User? user = repository.GetById(id);
+            return TypedResults.Ok();
+        }
+
         /// <summary>
         /// Retrieves users, optionally filtered by a case-insensitive search on first name, last name, or full name.
         /// </summary>
@@ -51,11 +63,6 @@ namespace exercise.wwwapi.EndPoints
         private static async Task<IResult> GetUsers(IRepository<User> repository, ClaimsPrincipal claims, string? name)
         {
             int? id  = claims.UserRealId();
-            if (id == null)
-            {
-                return TypedResults.Ok(new ResponseDTO<object>()
-                    { Message = "Invalid token" });
-            }
 
             IEnumerable<User> results = await repository.Get();
             string? search = name?.Trim().ToLower();
@@ -161,7 +168,7 @@ namespace exercise.wwwapi.EndPoints
             return Results.Ok(response);
 
         }
-        
+
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

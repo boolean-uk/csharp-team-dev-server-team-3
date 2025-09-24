@@ -27,8 +27,8 @@ namespace exercise.wwwapi.Authorization.Handlers
             //_logger.LogWarning("Available claims in token: {Claims}", string.Join(", ", claims));
 
             // Get user ID from claims
-            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)
-                             ?? context.User.FindFirst(ClaimTypes.Sid);
+            var userIdClaim = context.User.FindFirst(ClaimTypes.Sid)
+                             ?? context.User.FindFirst(ClaimTypes.NameIdentifier);
 
 
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
