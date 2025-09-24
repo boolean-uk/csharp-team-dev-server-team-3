@@ -129,7 +129,7 @@ namespace exercise.tests.IntegrationTests
             return await SendAuthenticatedRequestAsync(HttpMethod.Patch, endpoint, token, body);
         }
 
-        protected async Task<HttpResponseMessage> SendAuthenticatedPutAsync<T>(string endpoint, string token, T? body)
+        protected async Task<HttpResponseMessage> SendAuthenticatedPutAsync<T>(string endpoint, string token, T body)
         {
             return await SendAuthenticatedRequestAsync(HttpMethod.Put, endpoint, token, body);
         }
