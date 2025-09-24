@@ -38,6 +38,10 @@ namespace exercise.wwwapi.EndPoints
         {
             int? id = claims.UserRealId();
             User? user = repository.GetById(id);
+            if (user == null) {
+                return TypedResults.BadRequest();
+            }
+            //UserDTO userDTO = Mapper.Map<UserDTO>(user);
             return TypedResults.Ok();
         }
 
