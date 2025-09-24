@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace exercise.wwwapi.Helpers
 {
-    public static class Validator
+    public static partial class Validator
     {
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace exercise.wwwapi.Helpers
             // Atleast one number               | Done
             // Atleast one special character    | Done
 
-            if (passwordString.Count() < 8) return "Too few characters";
+            if (passwordString.Length < 8) return "Too few characters";
 
             if (!passwordString.Any(char.IsUpper)) return "Missing uppercase characters";
 
@@ -50,7 +50,7 @@ namespace exercise.wwwapi.Helpers
         public static string Email(string emailString)
         {
             if (!new EmailAddressAttribute().IsValid(emailString)) return "Invalid email format";
-            if (!Regex.IsMatch(emailString, @"@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$")) return "Invalid email domain";
+            if (!MyRegex().IsMatch(emailString)) return "Invalid email domain";
             return "Accepted";
 
         }
@@ -70,8 +70,8 @@ namespace exercise.wwwapi.Helpers
         /// </returns>
         public static string Username(string usernameString)
         {
-            if (usernameString.Count() < 1) return "Length of username must be at least 1.";
-            if (usernameString.Count() > 39) return "Length of username must be at most 39.";
+            if (usernameString.Length < 1) return "Length of username must be at least 1.";
+            if (usernameString.Length > 39) return "Length of username must be at most 39.";
 
             string regexPattern = "^(?!.*--)(?!-)(?!.*-$)[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$";
             if (!Regex.IsMatch(usernameString, regexPattern)) return "Username must contain only alphanumeric characters that may be separated by single hyphens";
@@ -79,5 +79,7 @@ namespace exercise.wwwapi.Helpers
             return "Accepted";
         }
 
+        [GeneratedRegex(@"@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$")]
+        private static partial Regex MyRegex();
     }
 }

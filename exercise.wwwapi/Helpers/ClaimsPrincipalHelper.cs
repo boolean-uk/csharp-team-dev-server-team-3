@@ -37,7 +37,7 @@ namespace exercise.wwwapi.Helpers
 
             // Check if a claim was found and if its value can be parsed to a role
             if (claim != null && Enum.TryParse(claim.Value, out Roles role)) return (int)role;
-            
+
             return null;
         }
     }

@@ -34,7 +34,8 @@ namespace exercise.tests.IntegrationTests
         }
 
         [Test]
-        public async Task CreateToken_LongLife_ShouldExpireLater() {
+        public async Task CreateToken_LongLife_ShouldExpireLater()
+        {
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword, true, true);
             var handler = new JwtSecurityTokenHandler();
             var jwt = handler.ReadJwtToken(token);
@@ -45,13 +46,13 @@ namespace exercise.tests.IntegrationTests
             var expClaim = jwt.Claims.FirstOrDefault(c => c.Type == "exp")?.Value;
 
             //Console.WriteLine(expClaim);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(email, Is.EqualTo(TeacherEmail));
                 Assert.That(role, Is.EqualTo("1"));
                 Assert.That(jwt.ValidTo, Is.GreaterThan(DateTime.UtcNow.AddDays(6.5)));
                 Assert.That(jwt.ValidTo, Is.LessThan(DateTime.UtcNow.AddDays(7.5)));
-            });
+            }
         }
 
         [Test]

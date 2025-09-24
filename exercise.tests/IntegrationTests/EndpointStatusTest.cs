@@ -31,9 +31,12 @@ namespace exercise.tests.IntegrationTests
             var message = await response.ReadJsonAsync();
 
             Console.WriteLine("Message: " + message);
-            // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Endpoint not found"));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Endpoint not found"));
+            }
         }
 
         /// <summary>
@@ -51,9 +54,12 @@ namespace exercise.tests.IntegrationTests
 
 
             Console.WriteLine("Message: " + message);
-            // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Endpoint not found"));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Endpoint not found"));
+            }
         }
     }
 }

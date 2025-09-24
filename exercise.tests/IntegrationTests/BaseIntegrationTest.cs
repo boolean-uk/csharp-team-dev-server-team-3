@@ -1,13 +1,9 @@
 ﻿using exercise.wwwapi.DTOs.Login;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 
 namespace exercise.tests.IntegrationTests
 {
@@ -23,20 +19,20 @@ namespace exercise.tests.IntegrationTests
     }
     public abstract class BaseIntegrationTest
     {
-        protected WebApplicationFactory<Program> _factory;
-        protected HttpClient _client;
+        private WebApplicationFactory<Program> _factory;
+        protected HttpClient Client;
 
         [SetUp]
         public void BaseSetup()
         {
             _factory = new WebApplicationFactory<Program>();
-            _client = _factory.CreateClient();
+            Client = _factory.CreateClient();
         }
 
         [TearDown]
         public void BaseTearDown()
         {
-            _client?.Dispose();
+            Client?.Dispose();
             _factory?.Dispose();
         }
 
@@ -83,7 +79,7 @@ namespace exercise.tests.IntegrationTests
                 "application/json"
             );
 
-            var loginResponse = await _client.PostAsync("/login", loginRequestBody);
+            var loginResponse = await Client.PostAsync("/login", loginRequestBody);
             //loginResponse.EnsureSuccessStatusCode();
 
             var loginContent = await loginResponse.Content.ReadAsStringAsync();
@@ -96,7 +92,7 @@ namespace exercise.tests.IntegrationTests
         }
 
         // Helper methods
-        protected async Task<HttpResponseMessage> SendAuthenticatedRequestAsync<T>(
+        private async Task<HttpResponseMessage> SendAuthenticatedRequestAsync<T>(
             HttpMethod method,
             string endpoint,
             string token,
@@ -112,7 +108,7 @@ namespace exercise.tests.IntegrationTests
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
 
-            return await _client.SendAsync(request);
+            return await Client.SendAsync(request);
         }
 
         protected async Task<HttpResponseMessage> SendAuthenticatedGetAsync(string endpoint, string token)

@@ -10,6 +10,6 @@ namespace exercise.wwwapi.Models
         [Column("title")]
         public string Title { get; set; }
         public ICollection<CohortCourse> CohortCourses { get; set; } = new List<CohortCourse>();
-        
+
     }
 }

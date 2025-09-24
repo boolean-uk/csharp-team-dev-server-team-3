@@ -22,7 +22,7 @@ namespace exercise.wwwapi.EndPoints
         public static void ConfigureAuthApi(this WebApplication app)
         {
             app.MapPost("/login", Login).WithSummary("Localhost Login");
-            
+
             var users = app.MapGroup("users");
             users.MapPost("/", Register).WithSummary("Create user");
             users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
@@ -52,31 +52,31 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         private static async Task<IResult> GetUsers(IRepository<User> repository, ClaimsPrincipal claims, string? name)
         {
-            int? id  = claims.UserRealId();
+            int? id = claims.UserRealId();
 
             IEnumerable<User> results = await repository.Get();
             string? search = name?.Trim().ToLower();
-            
+
             UsersSuccessDTO userData = new UsersSuccessDTO()
             {
                 Users = !string.IsNullOrWhiteSpace(search)
                     ? results.Where(i =>
-                        (i.FirstName.ToLower().Contains(search)) ||
-                        (i.LastName.ToLower().Contains(search)) ||
-                        ($"{i.FirstName ?? ""} {i.LastName ?? ""}".ToLower().Contains(search))
+                        (i.FirstName.Contains(search, StringComparison.CurrentCultureIgnoreCase)) ||
+                        (i.LastName.Contains(search, StringComparison.CurrentCultureIgnoreCase)) ||
+                        ($"{i.FirstName ?? ""} {i.LastName ?? ""}".Contains(search, StringComparison.CurrentCultureIgnoreCase))
                     ).ToList()
                     : results.ToList()
             };
-            
+
             ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>()
             {
                 Message = "success",
                 Data = userData
             };
-            
+
             return TypedResults.Ok(response);
         }
-        
+
         // TODO: Docstring
         // Public endpoint, not authorized
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -87,13 +87,13 @@ namespace exercise.wwwapi.EndPoints
             // Validate password
             string validationResult = Validator.Password(request.password);
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = validationResult });
-            
+
             // Validate email
             string emailValidation = Validator.Email(request.email);
             if (emailValidation != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = emailValidation });
             var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() != 0) return Results.Conflict(new ResponseDTO<string>() { Message = "Fail" });
-            
+            if (emailExists.Any()) return Results.Conflict(new ResponseDTO<string>() { Message = "Fail" });
+
             // Put user
             var user = new User
             {
@@ -111,7 +111,7 @@ namespace exercise.wwwapi.EndPoints
 
             return Results.Created($"/users/{user.Id}", response);
         }
-        
+
         // TODO: Docstring
         // Public endpoint (not authorized)
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -126,13 +126,13 @@ namespace exercise.wwwapi.EndPoints
             string validationResult = Validator.Password(request.password);
             Console.WriteLine($"Password: {validationResult}");
             if (validationResult != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
-            
+
 
             //email doesn't exist, should probably be 404 user not found, but should maybe just say invalid email or password
             //check if email is in database
             var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
-            if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
-            
+            if (!emailExists.Any()) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
+
             User user = repository.GetAll().FirstOrDefault(u => u.Email == request.email)!;
 
 
@@ -147,7 +147,7 @@ namespace exercise.wwwapi.EndPoints
             else token = CreateToken(user, config, 1.0 / 24);
 
 
-            ResponseDTO <LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
+            ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
             {
                 Message = "success",
                 Data = new LoginSuccessDTO()
@@ -179,7 +179,7 @@ namespace exercise.wwwapi.EndPoints
 
             return TypedResults.Ok(response);
         }
-        
+
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -193,7 +193,7 @@ namespace exercise.wwwapi.EndPoints
             var user = repository.GetById(id);
 
             if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
-            
+
             if (user.Id != claims.UserRealId() && claims.Role() == (int)Roles.student)
             {
                 var forbiddenResponse = new ResponseDTO<object>
@@ -208,7 +208,7 @@ namespace exercise.wwwapi.EndPoints
                 // Validate username
                 if (Validator.Username(userPatch.Username) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid username" });
                 var usernameExists = repository.GetAllFiltered(q => q.Username == userPatch.Username);
-                if (usernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Username is already in use" });
+                if (usernameExists.Any()) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Username is already in use" });
                 // Update
                 user.Username = userPatch.Username;
             }
@@ -217,7 +217,7 @@ namespace exercise.wwwapi.EndPoints
                 // Validate github username
                 if (Validator.Username(userPatch.GithubUsername) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid GitHub username" });
                 var gitUsernameExists = repository.GetAllFiltered(q => q.GithubUsername == userPatch.GithubUsername);
-                if (gitUsernameExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "GitHub username is already in use" });
+                if (gitUsernameExists.Any()) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "GitHub username is already in use" });
                 // Update
                 user.GithubUsername = userPatch.GithubUsername;
             }
@@ -226,7 +226,7 @@ namespace exercise.wwwapi.EndPoints
                 // Validate email
                 if (Validator.Email(userPatch.Email) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email" });
                 var emailExists = repository.GetAllFiltered(q => q.Email == userPatch.Email);
-                if (emailExists.Count() != 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Email is already in use" });
+                if (emailExists.Any()) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Email is already in use" });
                 // Update
                 user.Email = userPatch.Email;
             }
@@ -267,7 +267,7 @@ namespace exercise.wwwapi.EndPoints
 
             return TypedResults.Ok(response);
         }
-        
+
         // Helper, creates jwt tokens
         private static string CreateToken(User user, IConfigurationSettings config, double days)
         {

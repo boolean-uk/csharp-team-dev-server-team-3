@@ -12,11 +12,11 @@ namespace exercise.tests.Helpers
         /// </summary>
         public static IEnumerable<TestCaseData> UsernameValidationMessageCases()
         {
-            string[] endpoints = new string[]
-            {
+            string[] endpoints =
+            [
                 "username",
                 "git-username"
-            };
+            ];
 
             var cases = new List<(string input, string expected)>
             {
@@ -64,11 +64,11 @@ namespace exercise.tests.Helpers
         /// </summary>
         public static IEnumerable<TestCaseData> UsernameValidationStatusCases()
         {
-            string[] endpoints = new string[]
-            {
+            string[] endpoints =
+            [
                 "username",
                 "git-username"
-            };
+            ];
 
             var cases = new List<(string input, HttpStatusCode expected)>
             {

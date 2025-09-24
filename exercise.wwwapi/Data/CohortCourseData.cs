@@ -6,8 +6,8 @@ namespace exercise.wwwapi.Data
     {
         private List<string> _courseNames = new List<string>()
         {
-            "Software Development", 
-            "Front-End Development", 
+            "Software Development",
+            "Front-End Development",
             "Data Analytics"
         };
         private List<string> _cohortNames = new List<string>()
@@ -22,19 +22,19 @@ namespace exercise.wwwapi.Data
         private List<Cohort> _cohorts = new List<Cohort>();
         private List<CohortCourse> _cohortCourses = new List<CohortCourse>();
         private List<CohortCourseUser> _cohortCourseUsers = new List<CohortCourseUser>();
-        public CohortCourseData(List<User> users) 
-        { 
+        public CohortCourseData(List<User> users)
+        {
             Random random = new Random(1);
 
             for (int x = 0; x < _courseNames.Count; x++)
             {
-                Course course = new Course() { Id = x+1 , Title = _courseNames[x] };
+                Course course = new Course() { Id = x + 1, Title = _courseNames[x] };
                 _courses.Add(course);
             }
 
             for (int x = 0; x < _cohortNames.Count; x++)
             {
-                Cohort cohort = new Cohort() { Id = x+1 , Title = _cohortNames[x] };
+                Cohort cohort = new Cohort() { Id = x + 1, Title = _cohortNames[x] };
                 _cohorts.Add(cohort);
             }
 

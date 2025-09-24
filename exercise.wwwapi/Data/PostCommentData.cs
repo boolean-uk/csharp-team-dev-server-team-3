@@ -83,7 +83,7 @@ namespace exercise.wwwapi.Data
 
                     do
                     {
-                        commenterId = users[random.Next(users.Count())].Id;
+                        commenterId = users[random.Next(users.Count)].Id;
                     } while (commenterId == post.UserId);
 
                     _comments.Add(new PostComment

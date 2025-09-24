@@ -239,8 +239,11 @@ namespace exercise.tests.IntegrationTests
 
             Console.WriteLine("Message: " + message);
             Assert.That(message, Is.Not.Null);
-            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
-            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
+                Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+            }
         }
 
         /// <summary>
@@ -269,8 +272,11 @@ namespace exercise.tests.IntegrationTests
 
             Console.WriteLine("Message: " + message);
             Assert.That(message, Is.Not.Null);
-            Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
-            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(message?["message"]?.ToString(), Is.EqualTo(expectedMessage));
+                Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+            }
         }
 
         /// <summary>
@@ -298,8 +304,11 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo(expectedMessage));
-            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo(expectedMessage));
+                Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode));
+            }
         }
     }
 }

@@ -34,7 +34,7 @@ namespace exercise.tests.IntegrationTests
             var data = message?["data"]?.AsArray();
             Assert.That(data, Is.Not.Null);
             Assert.That(data?.Count, Is.GreaterThan(0));
-            
+
 
 
             Console.WriteLine("Message: " + message);
@@ -75,7 +75,7 @@ namespace exercise.tests.IntegrationTests
             }
         }
 
-       
+
 
         [TestCase(TeacherEmail, TeacherPassword)]
         [TestCase(StudentEmail1, StudentPassword1)]
@@ -99,7 +99,7 @@ namespace exercise.tests.IntegrationTests
         public async Task SuccessfulCreatePostMessage(string userEmail, string password)
         {
             string token = await LoginAndGetToken(userEmail, password);
-            CreatePostDTO body = new(){ Content = "Some content" };
+            CreatePostDTO body = new() { Content = "Some content" };
 
             //Act
             HttpResponseMessage response = await SendAuthenticatedPostAsync("/posts", token, body);
@@ -118,8 +118,8 @@ namespace exercise.tests.IntegrationTests
             {
                 Assert.That(data?["id"]?.GetValue<int>(), Is.GreaterThan(0));
                 Assert.That(data["content"]?.GetValue<string>(), Is.EqualTo("Some content"));
-                Assert.That(data["numLikes"]?.GetValue<int>(), Is.EqualTo(0));
-                Assert.That(data["comments"]?.AsArray().Count, Is.EqualTo(0));
+                Assert.That(data["numLikes"]?.GetValue<int>(), Is.Zero);
+                Assert.That(data["comments"]?.AsArray().Count, Is.Zero);
             }
 
             // Check User object inside data
@@ -142,7 +142,7 @@ namespace exercise.tests.IntegrationTests
         {
             string token = await LoginAndGetToken(userEmail, password);
 
-            CreatePostDTO body = new () { Content = content };
+            CreatePostDTO body = new() { Content = content };
 
             //Act 
             HttpResponseMessage response = await SendAuthenticatedPostAsync("/posts", token, body);
@@ -206,10 +206,13 @@ namespace exercise.tests.IntegrationTests
             HttpResponseMessage deleteAgainResponse = await SendAuthenticatedDeleteAsync($"/posts/{createdPostId}", token);
             JsonNode? deleteAgainMessage = await deleteAgainResponse.ReadJsonAsync();
 
+            using (Assert.EnterMultipleScope())
+            {
 
-            // Assert not found
-            Assert.That(deleteAgainResponse.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            Assert.That(deleteAgainMessage?["message"]?.GetValue<string>(), Is.EqualTo("Post not found"));
+                // Assert not found
+                Assert.That(deleteAgainResponse.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+                Assert.That(deleteAgainMessage?["message"]?.GetValue<string>(), Is.EqualTo("Post not found"));
+            }
         }
 
 
@@ -228,7 +231,7 @@ namespace exercise.tests.IntegrationTests
         {
 
             // Arrange: Login and get token
-            string token = await LoginAndGetToken(userEmail, password, password != "Wrong!1" );
+            string token = await LoginAndGetToken(userEmail, password, password != "Wrong!1");
 
 
             // Arrange
@@ -263,11 +266,11 @@ namespace exercise.tests.IntegrationTests
             }
             else if (expected == HttpStatusCode.BadRequest)
             {
-                Assert.Multiple(() =>
+                using (Assert.EnterMultipleScope())
                 {
                     Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Content cannot be empty"));
                     Assert.That(message?["data"], Is.Null);
-                });
+                }
             }
             else if (expected == HttpStatusCode.Forbidden)
             {
@@ -305,12 +308,12 @@ namespace exercise.tests.IntegrationTests
             JsonNode? commentmessage = await commentresponse.ReadJsonAsync();
 
             Console.WriteLine(commentmessage);
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 // Assert
                 Assert.That(commentresponse.StatusCode, Is.EqualTo(HttpStatusCode.Created));
                 Assert.That(commentmessage?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
-            });
+            }
 
             var data = commentmessage?["data"];
             Assert.That(data, Is.Not.Null);
@@ -368,17 +371,23 @@ namespace exercise.tests.IntegrationTests
 
             Console.WriteLine(message);
 
-            // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+            }
 
             var data = message?["data"]?.AsArray();
             Assert.That(data, Is.Not.Null);
             Assert.That(data?.Count, Is.GreaterThan(0));
 
             var firstComment = data.First();
-            Assert.That(firstComment?["id"]?.GetValue<int>(), Is.GreaterThan(0));
-            Assert.That(firstComment?["content"]?.GetValue<string>(), Is.Not.Null.Or.Empty);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(firstComment?["id"]?.GetValue<int>(), Is.GreaterThan(0));
+                Assert.That(firstComment?["content"]?.GetValue<string>(), Is.Not.Null.Or.Empty);
+            }
 
             var user = firstComment?["user"];
             Assert.That(user, Is.Not.Null);
@@ -388,13 +397,13 @@ namespace exercise.tests.IntegrationTests
         [TestCase(TeacherEmail, TeacherPassword, "Updated test content", HttpStatusCode.OK)]
         [TestCase(TeacherEmail, TeacherPassword, "", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, "   ", HttpStatusCode.BadRequest)]
-        public async Task EditComment_WithVariousInputs(string userEmail, string password,string newContent, HttpStatusCode expectedStatus)
+        public async Task EditComment_WithVariousInputs(string userEmail, string password, string newContent, HttpStatusCode expectedStatus)
         {
-            
+
             string token = await LoginAndGetToken(userEmail, password);
 
             // Arrange: First create a post
-            CreatePostCommentDTO commentDTO = new () { Content = "Original comment to edit" };
+            CreatePostCommentDTO commentDTO = new() { Content = "Original comment to edit" };
             CreatePostDTO postDTO = new() { Content = "Some content" };
 
             HttpResponseMessage postRes = await SendAuthenticatedPostAsync("/posts", token, postDTO);
@@ -419,7 +428,7 @@ namespace exercise.tests.IntegrationTests
             Assert.That(createdCommentId, Is.Not.Null);
 
 
-            CreatePostCommentDTO updateDTO = new ()  { Content = newContent };
+            CreatePostCommentDTO updateDTO = new() { Content = newContent };
             // Act 
             HttpResponseMessage response = await SendAuthenticatedPatchAsync($"/comments/{createdCommentId}", token, updateDTO);
             JsonNode? message = await response.ReadJsonAsync();
@@ -525,11 +534,14 @@ namespace exercise.tests.IntegrationTests
             // Assert
             JsonNode? message = await response.ReadJsonAsync();
             Console.WriteLine(message);
-            // Assert status
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert status
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+            }
             var data = message?["data"]?.AsArray();
             Assert.That(data, Is.Not.Null);
             Assert.That(data?.Count, Is.GreaterThan(0), "Expected user 1 to have at least one post.");
@@ -541,8 +553,11 @@ namespace exercise.tests.IntegrationTests
             }
 
             var firstPost = data.First();
-            Assert.That(firstPost?["id"]?.GetValue<int>(), Is.GreaterThan(0));
-            Assert.That(firstPost?["content"]?.GetValue<string>(), Is.Not.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(firstPost?["id"]?.GetValue<int>(), Is.GreaterThan(0));
+                Assert.That(firstPost?["content"]?.GetValue<string>(), Is.Not.Null);
+            }
         }
 
         [Test]
@@ -552,7 +567,7 @@ namespace exercise.tests.IntegrationTests
             int nonExistentUserId = 99999;
 
             var token = await LoginAndGetToken("oyvind.perez1@example.com", "SuperHash!4");
-            
+
             // ACT
             var response = await SendAuthenticatedGetAsync($"/posts/user/{nonExistentUserId}", token);
 
@@ -560,10 +575,13 @@ namespace exercise.tests.IntegrationTests
             //assert
             JsonNode? message = await response.ReadJsonAsync();
 
-            // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("No posts found for this user"));
-            Assert.That(message?["data"], Is.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("No posts found for this user"));
+                Assert.That(message?["data"], Is.Null);
+            }
         }
 
         [Test]
@@ -582,10 +600,13 @@ namespace exercise.tests.IntegrationTests
             JsonNode? message = await response.ReadJsonAsync();
             Console.WriteLine(message);
 
-            // Assert status
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert status
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("Success"));
+            }
             var data = message?["data"]?.AsArray();
             Assert.That(data, Is.Not.Null);
             Assert.That(data?.Count, Is.GreaterThan(0), "Expected user 1 to have at least one comment.");
@@ -597,8 +618,11 @@ namespace exercise.tests.IntegrationTests
             }
 
             var firstComment = data.First();
-            Assert.That(firstComment?["id"]?.GetValue<int>(), Is.GreaterThan(0));
-            Assert.That(firstComment?["content"]?.GetValue<string>(), Is.Not.Null.Or.Empty);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(firstComment?["id"]?.GetValue<int>(), Is.GreaterThan(0));
+                Assert.That(firstComment?["content"]?.GetValue<string>(), Is.Not.Null.Or.Empty);
+            }
         }
 
         [Test]
@@ -615,10 +639,13 @@ namespace exercise.tests.IntegrationTests
             // Assert
             JsonNode? message = await response.ReadJsonAsync();
 
-            // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("No comments found for this user"));
-            Assert.That(message?["data"], Is.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+                Assert.That(message?["message"]?.GetValue<string>(), Is.EqualTo("No comments found for this user"));
+                Assert.That(message?["data"], Is.Null);
+            }
         }
 
     }

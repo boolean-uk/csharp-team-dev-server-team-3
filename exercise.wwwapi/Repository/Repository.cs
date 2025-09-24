@@ -19,7 +19,7 @@ namespace exercise.wwwapi.Repository
 
         public IEnumerable<T> GetAll(params Expression<Func<T, object>>[] includeExpressions)
         {
-            if (includeExpressions.Any())
+            if (includeExpressions.Length != 0)
             {
                 var set = includeExpressions
                     .Aggregate<Expression<Func<T, object>>, IQueryable<T>>

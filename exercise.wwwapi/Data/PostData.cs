@@ -59,7 +59,7 @@ namespace exercise.wwwapi.Data
         public PostData(List<User> users)
         {
             Random random = new Random(1);
-            
+
             for (int i = 1; i < users.Count / 5; i++)
             {
                 string subject = _subject[random.Next(9 - 1)];

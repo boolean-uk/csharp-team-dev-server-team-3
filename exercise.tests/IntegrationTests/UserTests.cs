@@ -39,7 +39,7 @@ namespace exercise.tests.IntegrationTests
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/users", requestBody);
+            var response = await Client.PostAsync("/users", requestBody);
 
             var contentString = await response.Content.ReadAsStringAsync();
 
@@ -77,7 +77,7 @@ namespace exercise.tests.IntegrationTests
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/users", requestBody);
+            var response = await Client.PostAsync("/users", requestBody);
 
             var contentString = await response.Content.ReadAsStringAsync();
 
@@ -112,7 +112,7 @@ namespace exercise.tests.IntegrationTests
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/login", requestBody);
+            var response = await Client.PostAsync("/login", requestBody);
 
             var contentString = await response.Content.ReadAsStringAsync();
 
@@ -123,11 +123,17 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(message, Is.Not.Null);
-            Assert.That(message?["data"], Is.Not.Null);
-            Assert.That(message["data"]["token"], Is.Not.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(message, Is.Not.Null);
+            }
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(message?["data"], Is.Not.Null);
+                Assert.That(message["data"]["token"], Is.Not.Null);
+            }
         }
 
         /// <summary>
@@ -150,7 +156,7 @@ namespace exercise.tests.IntegrationTests
             var requestBody = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/login", requestBody);
+            var response = await Client.PostAsync("/login", requestBody);
 
             var contentString = await response.Content.ReadAsStringAsync();
 
@@ -161,9 +167,12 @@ namespace exercise.tests.IntegrationTests
             }
 
             Console.WriteLine("Message: " + message);
-            // Assert
-            Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.OK));
-            Assert.That(message, Is.Not.Null);
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(response.StatusCode, Is.Not.EqualTo(HttpStatusCode.OK));
+                Assert.That(message, Is.Not.Null);
+            }
 
             Assert.That(message["message"], Is.Not.Null);
             Assert.That(message["message"]!.GetValue<string>(), Is.EqualTo("Invalid email and/or password provided"));
@@ -180,7 +189,7 @@ namespace exercise.tests.IntegrationTests
             {
                 Username = "roman-olsen13",
                 Email = "roman.olsen13@example.com",
-                Password = "aGoodPassword!200" ,
+                Password = "aGoodPassword!200",
                 Role = 0
             };
 
@@ -199,10 +208,10 @@ namespace exercise.tests.IntegrationTests
         public async Task UpdateUserNullFieldsOnly()
         {
             var fieldsToUpdate = new UserPatchDTO();
-            
+
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
             int userId = 1;
-            
+
             var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -220,7 +229,7 @@ namespace exercise.tests.IntegrationTests
 
             int userId = 13;
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
-            
+
             var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -238,7 +247,7 @@ namespace exercise.tests.IntegrationTests
 
             int userId = 13;
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
-            
+
             var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -277,7 +286,7 @@ namespace exercise.tests.IntegrationTests
 
             int userId = 13;
             var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
-            
+
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -332,7 +341,7 @@ namespace exercise.tests.IntegrationTests
 
             int userId = 13;
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
-            
+
             var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -346,12 +355,12 @@ namespace exercise.tests.IntegrationTests
         {
             var fieldsToUpdate = new UserPatchDTO()
             {
-                Email="nigel.nowak2@example.com"
+                Email = "nigel.nowak2@example.com"
             };
-            
+
             int userId = 13;
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
-            
+
             var response = await SendAuthenticatedPatchAsync($"/users/{userId}", token, fieldsToUpdate);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -367,7 +376,7 @@ namespace exercise.tests.IntegrationTests
         public async Task GetUserByIdTest(string id, HttpStatusCode responseStatus)
         {
             string token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
-            
+
             var response = await SendAuthenticatedGetAsync($"/users/{id}", token);
             Assert.That(response.StatusCode, Is.EqualTo(responseStatus));
 

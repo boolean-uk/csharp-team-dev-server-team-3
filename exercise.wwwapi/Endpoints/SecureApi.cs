@@ -13,7 +13,7 @@ namespace exercise.wwwapi.EndPoints
         {
             app.MapGet("message", GetMessage);
         }
-        
+
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

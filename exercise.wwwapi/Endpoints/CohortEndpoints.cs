@@ -60,7 +60,7 @@ namespace exercise.wwwapi.Endpoints
         [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public static async Task<IResult> GetCohortByUserId(IRepository<Cohort> cohortRepo, IMapper mapper, int userId) 
+        public static async Task<IResult> GetCohortByUserId(IRepository<Cohort> cohortRepo, IMapper mapper, int userId)
         {
             var results = cohortRepo.GetWithIncludes(q => q
                 .Include(c => c.CohortCourses)
@@ -141,7 +141,7 @@ namespace exercise.wwwapi.Endpoints
 
             var results = cohortService.GetAllFiltered(c => c.Title == request.Title);
             Console.WriteLine(results);
-            if (results.Any()) 
+            if (results.Any())
                 return TypedResults.BadRequest(new ResponseDTO<object>
                 {
                     Message = $"Cohort with name '{request.Title}' already exists",
@@ -210,7 +210,7 @@ namespace exercise.wwwapi.Endpoints
 
             // 1. Get the user
             var user = userService.GetById(userId);
-            if (user == null) 
+            if (user == null)
                 return TypedResults.BadRequest(new ResponseDTO<object>
                 {
                     Message = $"User with Id {userId} not found."
@@ -224,7 +224,7 @@ namespace exercise.wwwapi.Endpoints
                     .ThenInclude(cc => cc.CohortCourseUsers)
                         .ThenInclude(ccu => ccu.User));
 
-            if (cohort == null) 
+            if (cohort == null)
                 return TypedResults.BadRequest(new ResponseDTO<object>
                 {
                     Message = $"Cohort with Id {cohortId} not found."
@@ -332,10 +332,10 @@ namespace exercise.wwwapi.Endpoints
             var isTrue = false;
             foreach (var cc in cohort.CohortCourses)
             {
-                if (cc.CohortCourseUsers.Any(ccu => ccu.UserId == userId)) isTrue = true;     
+                if (cc.CohortCourseUsers.Any(ccu => ccu.UserId == userId)) isTrue = true;
             }
             if (!isTrue)
-                {
+            {
                 return TypedResults.BadRequest(new ResponseDTO<object>
                 {
                     Message = "The specified user is not part of this cohort."
