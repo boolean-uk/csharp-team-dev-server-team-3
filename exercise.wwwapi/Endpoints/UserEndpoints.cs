@@ -22,7 +22,6 @@ namespace exercise.wwwapi.EndPoints
         public static void ConfigureAuthApi(this WebApplication app)
         {
             app.MapPost("/login", Login).WithSummary("Localhost Login");
-            app.MapGet("/me", Me).WithSummary("Return user associated with token");
             
             var users = app.MapGroup("users");
             users.MapPost("/", Register).WithSummary("Create user");
@@ -30,19 +29,6 @@ namespace exercise.wwwapi.EndPoints
             users.MapGet("/{id:int}", GetUserById).WithSummary("Get user by user id");
             users.MapPatch("/{id:int}", UpdateUser).WithSummary("Update a user");
 
-        }
-
-        [Authorize]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        private static IResult Me(IRepository<User> repository, IMapper mapper, ClaimsPrincipal claims)
-        {
-            int? id = claims.UserRealId();
-            User? user = repository.GetById(id);
-            if (user == null) {
-                return TypedResults.BadRequest();
-            }
-            //UserDTO userDTO = Mapper.Map<UserDTO>(user);
-            return TypedResults.Ok();
         }
 
         /// <summary>
@@ -156,7 +142,11 @@ namespace exercise.wwwapi.EndPoints
                 return Results.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided" });
             }
 
-            string token = CreateToken(user, config);
+            string token;
+            token = CreateToken(user, config);
+            //if (request.longlifetoken != null && request.longlifetoken) token = CreateToken(user, config); 
+            //else token = CreateToken(user, config);
+
 
             ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
             {
