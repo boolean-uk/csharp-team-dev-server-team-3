@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace exercise.wwwapi.EndPoints
 {
@@ -27,8 +28,9 @@ namespace exercise.wwwapi.EndPoints
             users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
             users.MapGet("/{id:int}", GetUserById).WithSummary("Get user by user id");
             users.MapPatch("/{id:int}", UpdateUser).WithSummary("Update a user");
+
         }
-        
+
         /// <summary>
         /// Retrieves users, optionally filtered by a case-insensitive search on first name, last name, or full name.
         /// </summary>
@@ -51,11 +53,6 @@ namespace exercise.wwwapi.EndPoints
         private static async Task<IResult> GetUsers(IRepository<User> repository, ClaimsPrincipal claims, string? name)
         {
             int? id  = claims.UserRealId();
-            if (id == null)
-            {
-                return TypedResults.Ok(new ResponseDTO<object>()
-                    { Message = "Invalid token" });
-            }
 
             IEnumerable<User> results = await repository.Get();
             string? search = name?.Trim().ToLower();
@@ -145,9 +142,12 @@ namespace exercise.wwwapi.EndPoints
                 return Results.BadRequest(new ResponseDTO<Object>() { Message = "Invalid email and/or password provided" });
             }
 
-            string token = CreateToken(user, config);
+            string token;
+            if (request.longlifetoken.GetValueOrDefault()) token = CreateToken(user, config, 7);
+            else token = CreateToken(user, config, 1.0 / 24);
 
-            ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
+
+            ResponseDTO <LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
             {
                 Message = "success",
                 Data = new LoginSuccessDTO()
@@ -161,7 +161,7 @@ namespace exercise.wwwapi.EndPoints
             return Results.Ok(response);
 
         }
-        
+
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -269,7 +269,7 @@ namespace exercise.wwwapi.EndPoints
         }
         
         // Helper, creates jwt tokens
-        private static string CreateToken(User user, IConfigurationSettings config)
+        private static string CreateToken(User user, IConfigurationSettings config, double days)
         {
             List<Claim> claims =
             [
@@ -284,7 +284,7 @@ namespace exercise.wwwapi.EndPoints
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.UtcNow.AddDays(days),
                 signingCredentials: credentials
                 );
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);

@@ -72,9 +72,9 @@ namespace exercise.tests.IntegrationTests
         protected const int StudentCommentID2 = 3;
 
 
-        protected async Task<string> LoginAndGetToken(string email, string password, bool success = true)
+        protected async Task<string> LoginAndGetToken(string email, string password, bool success = true, bool longlife = false)
         {
-            var loginBody = new LoginRequestDTO { email = email, password = password };
+            var loginBody = new LoginRequestDTO { email = email, password = password, longlifetoken = longlife };
             var loginRequestBody = new StringContent(
                 JsonSerializer.Serialize(loginBody),
                 Encoding.UTF8,
