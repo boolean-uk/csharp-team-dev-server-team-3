@@ -58,11 +58,13 @@ namespace exercise.tests.IntegrationTests
          */
         protected const string TeacherEmail = "anna.gruber160@example.com"; // has post id 34,35 and comment id 37
         protected const string TeacherPassword = "Neidintulling!l33t";
+        protected const int TeacherId = 160;
         protected const int TeacherPostID = 34;
         protected const int TeacherCommentID = 37;
 
         protected const string StudentEmail1 = "jan.larsen9@example.com"; //id 232, has post id 57, 58 and comment id 2
         protected const string StudentPassword1 = "SuperHash!4";
+        protected const int StudentId1 = 9;
         protected const int StudentPostID1 = 57;
         protected const int StudentCommentID1 = 2;
 
@@ -127,9 +129,14 @@ namespace exercise.tests.IntegrationTests
             return await SendAuthenticatedRequestAsync(HttpMethod.Patch, endpoint, token, body);
         }
 
-        protected async Task<HttpResponseMessage> SendAuthenticatedPutAsync<T>(string endpoint, string token, T body)
+        protected async Task<HttpResponseMessage> SendAuthenticatedPutAsync<T>(string endpoint, string token, T? body)
         {
             return await SendAuthenticatedRequestAsync(HttpMethod.Put, endpoint, token, body);
+        }
+
+        protected async Task<HttpResponseMessage> SendAuthenticatedPostAsync(string endpoint, string token)
+        {
+            return await SendAuthenticatedRequestAsync<object>(HttpMethod.Post, endpoint, token);
         }
 
         protected async Task<HttpResponseMessage> SendAuthenticatedDeleteAsync(string endpoint, string token)
