@@ -143,9 +143,8 @@ namespace exercise.wwwapi.EndPoints
             }
 
             string token;
-            token = CreateToken(user, config);
-            //if (request.longlifetoken != null && request.longlifetoken) token = CreateToken(user, config); 
-            //else token = CreateToken(user, config);
+            //if (request.longlifetoken.GetValueOrDefault()) token = CreateToken(user, config, 7); 
+            //else token = CreateToken(user, config, );
 
 
             ResponseDTO<LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
