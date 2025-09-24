@@ -143,10 +143,8 @@ namespace exercise.wwwapi.EndPoints
             }
 
             string token;
-
-            //token = CreateToken(user, config);
             if (request.longlifetoken.GetValueOrDefault()) token = CreateToken(user, config, 7);
-            else token = CreateToken(user, config, 0.0416666666666666666666666666666666666667);
+            else token = CreateToken(user, config, 1.0 / 24);
 
 
             ResponseDTO <LoginSuccessDTO> response = new ResponseDTO<LoginSuccessDTO>
@@ -286,7 +284,7 @@ namespace exercise.wwwapi.EndPoints
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(days),
+                expires: DateTime.UtcNow.AddDays(days),
                 signingCredentials: credentials
                 );
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
