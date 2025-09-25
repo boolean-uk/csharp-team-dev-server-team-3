@@ -14,8 +14,6 @@ namespace exercise.wwwapi.DTOs
         public Roles? Role { get; set; }
         public string? Specialism { get; set; }
         public string? Bio { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public string? Photo { get; set; }
         public BasicCohortDTO? Cohort { get; set; }
 
