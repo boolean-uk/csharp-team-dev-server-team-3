@@ -6,7 +6,7 @@ namespace exercise.wwwapi.DTOs.GetUsers
     public class UsersSuccessDTO
     {
         [JsonPropertyName("users")]
-        public List<User> Users { get; set; }
+        public List<UserDTO> Users { get; set; }
     }
 
 }

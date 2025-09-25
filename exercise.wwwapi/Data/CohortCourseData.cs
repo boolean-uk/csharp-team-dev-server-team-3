@@ -4,6 +4,8 @@ namespace exercise.wwwapi.Data
 {
     public class CohortCourseData
     {
+        DateTime somedate = new DateTime(2020, 12, 05, 0, 0, 0, DateTimeKind.Utc);
+
         private List<string> _courseNames = new List<string>()
         {
             "Software Development", 
@@ -34,7 +36,10 @@ namespace exercise.wwwapi.Data
 
             for (int x = 0; x < _cohortNames.Count; x++)
             {
-                Cohort cohort = new Cohort() { Id = x+1 , Title = _cohortNames[x] };
+                Cohort cohort = new Cohort() { Id = x+1 , Title = _cohortNames[x],
+                    StartDate = somedate.AddDays(-random.Next(0, 30)).AddMinutes(random.Next(400, 1200)),
+                    EndDate = somedate.AddDays(random.Next(31, 365)).AddMinutes(random.Next(400, 1200)),
+                };
                 _cohorts.Add(cohort);
             }
 

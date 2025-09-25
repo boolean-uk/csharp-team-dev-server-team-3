@@ -11,9 +11,15 @@ namespace workshop.wwwapi.Tools
     {
         public MappingProfile()
         {
-            CreateMap<User, UserDTO>();
+            // Might change this if we want to return all the cohorts a user is in OR the active cohort
+            CreateMap<User, UserDTO>()
+                .ForMember(dest => dest.Cohort, opt => opt.MapFrom(src => src.CohortCourseUsers.FirstOrDefault().Cohort)); 
+
             CreateMap<User, UserBasicDTO>();
+
             CreateMap<Post, PostDTO>();
+
+            CreateMap<Cohort, BasicCohortDTO>();
 
             CreateMap<Cohort, CohortDTO>()
                 .ForMember(dest => dest.Courses, opt => opt.MapFrom(src => src.CohortCourses));

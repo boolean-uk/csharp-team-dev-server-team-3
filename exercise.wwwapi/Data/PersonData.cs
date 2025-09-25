@@ -115,8 +115,6 @@ namespace exercise.wwwapi.Data
                     Specialism = specialism,
                     Role = role,
                     PasswordHash = password,
-                    StartDate = somedate.AddDays(-userRandom.Next(30, 30)),
-                    EndDate = somedate.AddDays(userRandom.Next(31, 365)),
                     Photo = photo
                 };
 

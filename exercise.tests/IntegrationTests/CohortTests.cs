@@ -270,7 +270,7 @@ namespace exercise.tests.IntegrationTests
         [TestCase(TeacherEmail, TeacherPassword, 1, 20, 1, "Cohort with Id 20 not found.", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, 1, 1, 10, "The specified course is not part of this cohort.", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, 11, 1, 1, "User is already in the specified course in the cohort.", HttpStatusCode.BadRequest)]
-        [TestCase(StudentEmail1, StudentPassword1, 1, 1, 1, "You are not authorized to add a user to a cohort.", HttpStatusCode.Forbidden)]
+        [TestCase(StudentEmail1, StudentPassword1, 1, 3, 1, "You are not authorized to add a user to a cohort.", HttpStatusCode.Forbidden)]
         public async Task AddUserToCohortAndDeleteUser(
             string email, 
             string password, 

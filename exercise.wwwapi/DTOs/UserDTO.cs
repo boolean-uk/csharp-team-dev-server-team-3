@@ -1,4 +1,5 @@
-﻿using exercise.wwwapi.Models;
+﻿using exercise.wwwapi.DTOs.Cohort;
+using exercise.wwwapi.Models;
 
 namespace exercise.wwwapi.DTOs
 {
@@ -16,5 +17,7 @@ namespace exercise.wwwapi.DTOs
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public string? Photo { get; set; }
+        public BasicCohortDTO? Cohort { get; set; }
+
     }
 }
