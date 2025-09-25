@@ -235,7 +235,7 @@ namespace exercise.wwwapi.EndPoints
                 // Validate username
                 if (Validator.Password(userPatch.Password) != "Accepted") return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid password" });
                 // Hash
-                string passwordHash = BCrypt.Net.BCrypt.HashPassword(userPatch.Username);
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(userPatch.Password);
                 // Update
                 user.PasswordHash = passwordHash;
             }
