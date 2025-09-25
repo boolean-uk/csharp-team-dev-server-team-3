@@ -269,8 +269,8 @@ namespace exercise.tests.IntegrationTests
         [TestCase(TeacherEmail, TeacherPassword, 350, 1, 1, "User with Id 350 not found.", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, 1, 20, 1, "Cohort with Id 20 not found.", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, 1, 1, 10, "The specified course is not part of this cohort.", HttpStatusCode.BadRequest)]
-        [TestCase(TeacherEmail, TeacherPassword, 11, 1, 1, "User is already in the specified course in the cohort.", HttpStatusCode.BadRequest)]
-        [TestCase(StudentEmail1, StudentPassword1, 1, 1, 1, "You are not authorized to add a user to a cohort.", HttpStatusCode.Forbidden)]
+        [TestCase(TeacherEmail, TeacherPassword, TeacherId, 3, 3, "User is already in the specified course in the cohort.", HttpStatusCode.BadRequest)]
+        [TestCase(StudentEmail1, StudentPassword1, 1, 3, 1, "You are not authorized to add a user to a cohort.", HttpStatusCode.Forbidden)]
         public async Task AddUserToCohortAndDeleteUser(
             string email, 
             string password, 
@@ -392,9 +392,9 @@ namespace exercise.tests.IntegrationTests
 
         [TestCase(TeacherEmail, TeacherPassword, 350, 1, 1, "User with Id 350 not found.", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, 1, 20, 1, "Cohort with Id 20 not found.", HttpStatusCode.BadRequest)]
-        [TestCase(TeacherEmail, TeacherPassword, 11, 1, 10, "The specified course is not part of this cohort.", HttpStatusCode.BadRequest)]
+        [TestCase(TeacherEmail, TeacherPassword, 11, 3, 10, "The specified course is not part of this cohort.", HttpStatusCode.BadRequest)]
         [TestCase(TeacherEmail, TeacherPassword, 1, 1, 1, "The specified user is not part of this cohort.", HttpStatusCode.BadRequest)]
-        [TestCase(TeacherEmail, TeacherPassword, 11, 1, 2, "User is in cohort, but is not taking the specified course.", HttpStatusCode.BadRequest)]
+        [TestCase(TeacherEmail, TeacherPassword, 11, 3, 2, "User is in cohort, but is not taking the specified course.", HttpStatusCode.BadRequest)]
         [TestCase(StudentEmail1, StudentPassword1, 1, 1, 1, "You are not authorized to delete a user from a cohort.", HttpStatusCode.Forbidden)]
         public async Task InvalidDeletes(
             string email,

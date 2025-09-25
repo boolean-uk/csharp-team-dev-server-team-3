@@ -9,6 +9,7 @@ using exercise.wwwapi.Models;
 using exercise.wwwapi.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -25,10 +26,9 @@ namespace exercise.wwwapi.EndPoints
             
             var users = app.MapGroup("users");
             users.MapPost("/", Register).WithSummary("Create user");
-            users.MapGet("/", GetUsers).WithSummary("Get all users by first name if provided");
+            users.MapGet("/", GetUsers).WithSummary("Get all users with name name if provided");
             users.MapGet("/{id:int}", GetUserById).WithSummary("Get user by user id");
             users.MapPatch("/{id:int}", UpdateUser).WithSummary("Update a user");
-
         }
 
         /// <summary>
@@ -50,28 +50,28 @@ namespace exercise.wwwapi.EndPoints
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        private static async Task<IResult> GetUsers(IRepository<User> repository, ClaimsPrincipal claims, string? name)
+        private static IResult GetUsers(IRepository<User> repository, IMapper mapper, ClaimsPrincipal claims, string? name)
         {
             int? id  = claims.UserRealId();
 
-            IEnumerable<User> results = await repository.Get();
+            IEnumerable<User> results = repository.GetWithIncludes(q => q.Include(u => u.CohortCourseUsers).ThenInclude(ccu => ccu.Cohort));
             string? search = name?.Trim().ToLower();
-            
-            UsersSuccessDTO userData = new UsersSuccessDTO()
-            {
-                Users = !string.IsNullOrWhiteSpace(search)
+
+            results = !string.IsNullOrWhiteSpace(search)
                     ? results.Where(i =>
                         (i.FirstName.ToLower().Contains(search)) ||
                         (i.LastName.ToLower().Contains(search)) ||
                         ($"{i.FirstName ?? ""} {i.LastName ?? ""}".ToLower().Contains(search))
                     ).ToList()
-                    : results.ToList()
-            };
+                    : results.ToList();
             
-            ResponseDTO<UsersSuccessDTO> response = new ResponseDTO<UsersSuccessDTO>()
+            ResponseDTO<UsersSuccessDTO> response = new()
             {
                 Message = "success",
-                Data = userData
+                Data = new UsersSuccessDTO()
+                {
+                    Users = mapper.Map<List<UserDTO>>(results)
+                }
             };
             
             return TypedResults.Ok(response);
@@ -132,9 +132,11 @@ namespace exercise.wwwapi.EndPoints
             //check if email is in database
             var emailExists = repository.GetAllFiltered(q => q.Email == request.email);
             if (emailExists.Count() == 0) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
-            
-            User user = repository.GetAll().FirstOrDefault(u => u.Email == request.email)!;
 
+            //User user = repository.GetAll().FirstOrDefault(u => u.Email == request.email)!;
+            User? user = repository.GetWithIncludes(q => q.Include(u => u.CohortCourseUsers).ThenInclude(ccu => ccu.Cohort)).FirstOrDefault(u => u.Email == request.email);
+
+            if (user == null) return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Invalid email and/or password provided" });
 
             if (!BCrypt.Net.BCrypt.Verify(request.password, user.PasswordHash))
             {
@@ -166,9 +168,9 @@ namespace exercise.wwwapi.EndPoints
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        private static async Task<IResult> GetUserById(IRepository<User> repository, ClaimsPrincipal claims, IMapper mapper, int id)
+        private static IResult GetUserById(IRepository<User> repository, ClaimsPrincipal claims, IMapper mapper, int id)
         {
-            var user = repository.GetById(id);
+            User? user = repository.GetById(id, q => q.Include(u => u.CohortCourseUsers).ThenInclude(ccu => ccu.Cohort));
             if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
 
             ResponseDTO<UserDTO> response = new ResponseDTO<UserDTO>
@@ -190,7 +192,7 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.GetType().GetProperties().Length > 0 && userPatch.GetType().GetProperties().All((p) => p.GetValue(userPatch) == null))
                 return TypedResults.BadRequest(new ResponseDTO<string>() { Message = "Provide at least one field for update" });
 
-            var user = repository.GetById(id);
+            User? user = repository.GetById(id, q => q.Include(u => u.CohortCourseUsers).ThenInclude(ccu => ccu.Cohort));
 
             if (user == null) return TypedResults.NotFound(new ResponseDTO<string> { Message = "User not found" });
             
@@ -251,8 +253,8 @@ namespace exercise.wwwapi.EndPoints
             if (userPatch.Specialism != null) user.Specialism = userPatch.Specialism;
             // TODO: Add cohort support after implementing the Cohort model and adding it to user.
             //if (userPatch.Cohort != null) user.Cohort = userPatch.Cohort;
-            if (userPatch.StartDate != null) user.StartDate = (DateTime)userPatch.StartDate;
-            if (userPatch.EndDate != null) user.EndDate = (DateTime)userPatch.EndDate;
+            //if (userPatch.StartDate != null) user.StartDate = (DateTime)userPatch.StartDate;
+            //if (userPatch.EndDate != null) user.EndDate = (DateTime)userPatch.EndDate;
             if (userPatch.Bio != null) user.Bio = userPatch.Bio;
             if (userPatch.Photo != null) user.Photo = userPatch.Photo;
 

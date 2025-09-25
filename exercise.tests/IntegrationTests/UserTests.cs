@@ -308,7 +308,7 @@ namespace exercise.tests.IntegrationTests
         {
             var fieldsToUpdate = new Dictionary<string, object?>
             {
-                { "username", "nigel-nowak2"}
+                { "username", TeacherUsername}
             };
 
             var token = await LoginAndGetToken(TeacherEmail, TeacherPassword);
@@ -327,7 +327,7 @@ namespace exercise.tests.IntegrationTests
         {
             var fieldsToUpdate = new UserPatchDTO()
             {
-                GithubUsername = "nigel-nowak2"
+                GithubUsername = TeacherUsername
             };
 
             int userId = 13;
@@ -346,7 +346,7 @@ namespace exercise.tests.IntegrationTests
         {
             var fieldsToUpdate = new UserPatchDTO()
             {
-                Email="nigel.nowak2@example.com"
+                Email=TeacherEmail
             };
             
             int userId = 13;

@@ -1,9 +1,11 @@
-﻿using exercise.wwwapi.Models;
+﻿using exercise.wwwapi.DTOs.Cohort;
+using exercise.wwwapi.Models;
 
 namespace exercise.wwwapi.DTOs
 {
     public class UserDTO
     {
+        public int Id { get; set; }
         public string? Username { get; set; }
         public string? Email { get; set; }
         public string? FirstName { get; set; }
@@ -13,8 +15,8 @@ namespace exercise.wwwapi.DTOs
         public Roles? Role { get; set; }
         public string? Specialism { get; set; }
         public string? Bio { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public string? Photo { get; set; }
+        public BasicCohortDTO? Cohort { get; set; }
+
     }
 }

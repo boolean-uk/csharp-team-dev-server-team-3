@@ -11,26 +11,8 @@ namespace exercise.tests.IntegrationTests
     /// <summary>
     /// Integration coverage for the validation endpoints, ensuring parity with business rules.
     /// </summary>
-    public class ValidationTests
+    public class ValidationTests : BaseIntegrationTest
     {
-        private WebApplicationFactory<Program> _factory;
-        private HttpClient _client;
-
-        [SetUp]
-        public void SetUp()
-        {
-            // Arrange 
-            _factory = new WebApplicationFactory<Program>();
-            _client = _factory.CreateClient();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            _client.Dispose();
-            _factory.Dispose();
-        }
-
         /// <summary>
         /// Ensures the password validation endpoint surfaces the correct status code per input.
         /// </summary>
@@ -218,7 +200,7 @@ namespace exercise.tests.IntegrationTests
         /// <param name="input">The username to query.</param>
         /// <param name="expectedMessage">The message expected from the API.</param>
         /// <param name="expectedStatusCode">The HTTP status code that should be returned.</param>
-        [TestCase("donald-esposito121", "Username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase(TeacherUsername, "Username is already in use", HttpStatusCode.BadRequest)]
         [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
         {
@@ -249,7 +231,7 @@ namespace exercise.tests.IntegrationTests
         /// <param name="input">The GitHub username to query.</param>
         /// <param name="expectedMessage">The response message expected.</param>
         /// <param name="expectedStatusCode">The HTTP status the endpoint should emit.</param>
-        [TestCase("donald-esposito121", "GitHub username is already in use", HttpStatusCode.BadRequest)]
+        [TestCase(TeacherUsername, "GitHub username is already in use", HttpStatusCode.BadRequest)]
         [TestCase("does-not-exist5", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateGitUsernameExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
         {
@@ -279,7 +261,7 @@ namespace exercise.tests.IntegrationTests
         /// <param name="input">The email to query.</param>
         /// <param name="expectedMessage">The message expected in the response.</param>
         /// <param name="expectedStatusCode">The HTTP status the endpoint should emit.</param>
-        [TestCase("nigel.nowak2@example.com", "Email already exists", HttpStatusCode.BadRequest)]
+        [TestCase(TeacherEmail, "Email already exists", HttpStatusCode.BadRequest)]
         [TestCase("valid@email.com.no", "Accepted", HttpStatusCode.OK)]
         public async Task ValidateEmailExists(string input, string expectedMessage, HttpStatusCode expectedStatusCode)
         {

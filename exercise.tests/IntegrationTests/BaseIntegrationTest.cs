@@ -56,22 +56,25 @@ namespace exercise.tests.IntegrationTests
         WHERE u.role = 'student'
         GROUP BY u.id, u.email, u.role, u.passwordhash;
          */
-        protected const string TeacherEmail = "anna.gruber160@example.com"; // has post id 34,35 and comment id 37
-        protected const string TeacherPassword = "Neidintulling!l33t";
-        protected const int TeacherId = 160;
+        protected const string TeacherEmail = "reduan.presley47@example.com"; 
+        protected const string TeacherPassword = "lettPassord123!";
+        protected const string TeacherUsername = "reduan-presley47";
+        protected const int TeacherId = 47;
         protected const int TeacherPostID = 34;
         protected const int TeacherCommentID = 37;
+        protected const int TeacherCohort = 37;
 
-        protected const string StudentEmail1 = "jan.larsen9@example.com"; //id 232, has post id 57, 58 and comment id 2
-        protected const string StudentPassword1 = "SuperHash!4";
-        protected const int StudentId1 = 9;
-        protected const int StudentPostID1 = 57;
-        protected const int StudentCommentID1 = 2;
+        protected const string StudentEmail1 = "james.olsen7@example.com"; 
+        protected const string StudentPassword1 = "Timianerkul1!";
+        protected const int StudentId1 = 7;
+        protected const int StudentPostID1 = 21;
+        protected const int StudentCommentID1 = 23;
 
-        protected const string StudentEmail2 = "timian.saar85@example.com"; //id 85, has post id 36 and comment id 3
-        protected const string StudentPassword2 = "Neidintulling!l33t";
-        protected const int StudentPostID2 = 36;
-        protected const int StudentCommentID2 = 3;
+        protected const string StudentEmail2 = "kate.delacruz54@example.com";
+        protected const string StudentPassword2 = "lettPassord123!";
+        protected const int StudentId2 = 54;
+        protected const int StudentPostID2 = 24;
+        protected const int StudentCommentID2 = 46;
 
 
         protected async Task<string> LoginAndGetToken(string email, string password, bool success = true, bool longlife = false)

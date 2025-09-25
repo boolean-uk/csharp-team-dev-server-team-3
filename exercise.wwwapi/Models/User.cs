@@ -41,12 +41,6 @@ namespace exercise.wwwapi.Models
         [Column("specialism")]
         public string Specialism { get; set; } = string.Empty;
 
-        [Column("startDate")]
-        public DateTime StartDate { get; set; }
-
-        [Column("endDate")]
-        public DateTime EndDate { get; set; }
-
         [Column("photo")]
         public string Photo { get; set; } = string.Empty;
 
