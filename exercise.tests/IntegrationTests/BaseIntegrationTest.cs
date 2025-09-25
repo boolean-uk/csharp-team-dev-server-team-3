@@ -62,6 +62,7 @@ namespace exercise.tests.IntegrationTests
         protected const int TeacherId = 47;
         protected const int TeacherPostID = 34;
         protected const int TeacherCommentID = 37;
+        protected const int TeacherCohort = 37;
 
         protected const string StudentEmail1 = "james.olsen7@example.com"; 
         protected const string StudentPassword1 = "Timianerkul1!";
